@@ -1,0 +1,194 @@
+---
+title: 'Theme Selector'
+description: 'Interactive theme selection using Wofi'
+icon: 'palette'
+---
+
+## Overview
+
+The `theme-selector` script provides an interactive graphical menu using Wofi that allows you to quickly switch between available themes. It acts as a user-friendly frontend to the `theme-switcher` script.
+
+<Info>
+  The theme selector is bound to **Super + T** by default in Hyprland for quick access.
+</Info>
+
+## How It Works
+
+The script presents a Wofi menu with all available themes and passes your selection to the theme-switcher script:
+
+1. Displays a list of available themes in a Wofi dmenu
+2. Waits for user selection
+3. Calls `theme-switcher` with the selected theme
+4. If you press Escape, nothing happens
+
+## Complete Script
+
+```bash
+#!/bin/bash
+
+# Definimos la lista de temas disponibles
+TEMAS="kanagawa\ngruvbox\ncatppuccin\neverforest"
+
+# Lanzamos Wofi y guardamos la elección del usuario en una variable
+ELECCION=$(echo -e "$TEMAS" | wofi --dmenu --prompt "🎨 Elige un tema:" --width 250 --height 350)
+
+# Si el usuario eligió algo (es decir, no pulsó Escape), ejecutamos set-theme
+if [ -n "$ELECCION" ]; then
+  ~/.local/bin/theme-switcher "$ELECCION"
+fi
+```
+
+## Script Breakdown
+
+### Available Themes
+
+```bash
+TEMAS="kanagawa\ngruvbox\ncatppuccin\neverforest"
+```
+
+Defines the list of available themes separated by newlines. These correspond to the theme configurations in your dotfiles.
+
+### Wofi Menu Display
+
+```bash
+ELECCION=$(echo -e "$TEMAS" | wofi --dmenu --prompt "🎨 Elige un tema:" --width 250 --height 350)
+```
+
+**Parameters:**
+- `--dmenu`: Runs Wofi in dmenu mode for simple list selection
+- `--prompt`: Sets the prompt text with an emoji icon
+- `--width 250`: Sets menu width to 250 pixels
+- `--height 350`: Sets menu height to 350 pixels
+
+### Theme Application
+
+```bash
+if [ -n "$ELECCION" ]; then
+  ~/.local/bin/theme-switcher "$ELECCION"
+fi
+```
+
+Only executes the theme switcher if a selection was made (not empty string). This prevents errors when pressing Escape.
+
+## Usage Examples
+
+### From Terminal
+
+```bash
+# Run the theme selector
+theme-selector
+```
+
+### From Hyprland
+
+The default keybinding is already configured:
+
+```conf
+bind = SUPER, T, exec, theme-selector
+```
+
+Press **Super + T** to open the theme selector menu.
+
+## Integration with Theme Switcher
+
+The theme selector is a lightweight wrapper around the [theme-switcher](/scripts/theme-switcher) script. When you select a theme:
+
+<Steps>
+  <Step title="User selects theme">
+    You choose a theme from the Wofi menu
+  </Step>
+  <Step title="Script validates selection">
+    Checks that selection is not empty
+  </Step>
+  <Step title="Calls theme-switcher">
+    Passes the selected theme name to `theme-switcher`
+  </Step>
+  <Step title="Theme applies">
+    All components update to the new theme
+  </Step>
+</Steps>
+
+## Customization
+
+### Adding New Themes
+
+To add a new theme to the selector:
+
+1. Add the theme configuration files (see [Theme Customization](/themes/customization))
+2. Update the `TEMAS` variable:
+
+```bash
+TEMAS="kanagawa\ngruvbox\ncatppuccin\neverforest\ntokyonight"
+```
+
+### Changing Menu Appearance
+
+Modify the Wofi parameters:
+
+```bash
+# Larger menu
+ELECCION=$(echo -e "$TEMAS" | wofi --dmenu --prompt "🎨 Theme:" --width 400 --height 500)
+
+# Different prompt
+ELECCION=$(echo -e "$TEMAS" | wofi --dmenu --prompt "Select Theme" --width 250 --height 350)
+```
+
+### Using a Different Menu
+
+Replace Wofi with Rofi or another dmenu alternative:
+
+```bash
+# Using Rofi
+ELECCION=$(echo -e "$TEMAS" | rofi -dmenu -p "🎨 Elige un tema:")
+
+# Using dmenu
+ELECCION=$(echo -e "$TEMAS" | dmenu -p "🎨 Elige un tema:")
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Wofi menu doesn't appear">
+    Check if Wofi is installed:
+    ```bash
+    which wofi
+    ```
+    
+    Install if missing:
+    ```bash
+    sudo pacman -S wofi
+    ```
+  </Accordion>
+  
+  <Accordion title="Theme doesn't change after selection">
+    Verify the theme-switcher script is executable and in your PATH:
+    ```bash
+    ls -la ~/.local/bin/theme-switcher
+    ```
+    
+    Make it executable if needed:
+    ```bash
+    chmod +x ~/.local/bin/theme-switcher
+    ```
+  </Accordion>
+  
+  <Accordion title="Custom theme not showing in menu">
+    Make sure you added it to the `TEMAS` variable in the script:
+    ```bash
+    nano ~/.local/bin/theme-selector
+    ```
+    
+    Add your theme to the list with `\n` separators.
+  </Accordion>
+</AccordionGroup>
+
+## Related Scripts
+
+<CardGroup cols={2}>
+  <Card title="Theme Switcher" icon="repeat" href="/scripts/theme-switcher">
+    The backend script that applies theme changes
+  </Card>
+  <Card title="Custom Scripts" icon="code" href="/scripts/custom">
+    Learn how to create your own scripts
+  </Card>
+</CardGroup>

@@ -1,0 +1,614 @@
+---
+title: Customizing Your Setup
+description: Learn how to customize keybindings, fonts, styling, and more in your Kanagawa configuration
+---
+
+## Modifying Keybindings
+
+Keybindings are configured in `~/dotfiles/config/hypr/keybindings.conf`.
+
+### Understanding the Current Keybindings
+
+The main modifier key is set to `SUPER` (Windows key):
+
+```conf
+$mainMod = SUPER
+```
+
+### Application Launchers
+
+Current application keybindings:
+
+```conf
+bind = $mainMod, T, exec, $terminal          # Ghostty terminal
+bind = $mainMod, C, exec, vscodium           # VSCodium editor
+bind = $mainMod, B, exec, $browser           # Brave browser
+bind = $mainMod, E, exec, $fileManager       # Nautilus file manager
+bind = $mainMod, O, exec, $notes             # Obsidian notes
+bind = $mainMod, space, exec, $menu          # Wofi launcher
+```
+
+### Changing Application Keybindings
+
+<Steps>
+  <Step title="Open keybindings config">
+    ```bash
+    nvim ~/dotfiles/config/hypr/keybindings.conf
+    ```
+  </Step>
+
+  <Step title="Modify the binding">
+    For example, to change terminal from `Super+T` to `Super+Enter`:
+
+    ```conf
+    # Old:
+    bind = $mainMod, T, exec, $terminal
+
+    # New:
+    bind = $mainMod, return, exec, $terminal
+    ```
+  </Step>
+
+  <Step title="Reload Hyprland">
+    ```bash
+    hyprctl reload
+    ```
+    Or press `Super+Shift+R` if you have a reload binding.
+  </Step>
+</Steps>
+
+### Common Key Names
+
+```plaintext
+return      - Enter key
+space       - Spacebar
+left/right/up/down - Arrow keys
+minus/plus  - +/- keys
+PRINT       - Print Screen
+F1-F12      - Function keys
+
+Media Keys:
+XF86AudioRaiseVolume
+XF86AudioLowerVolume
+XF86AudioMute
+XF86MonBrightnessUp
+XF86MonBrightnessDown
+```
+
+### Adding New Application Shortcuts
+
+To add a keybinding for a new application:
+
+```conf
+# At the top, define the application
+$spotify = spotify --enable-features=UseOzonePlatform --ozone-platform=wayland
+
+# Add the keybinding
+bind = $mainMod, S, exec, $spotify
+```
+
+### Window Management Keybindings
+
+Current window management shortcuts:
+
+```conf
+bind = $mainMod, W, killactive,              # Close window
+bind = $mainMod, V, togglefloating,          # Toggle floating
+bind = $mainMod, J, togglesplit,             # Toggle split
+bind = , F11, fullscreen, 0                  # Fullscreen
+bind = $mainMod, L, exec, hyprlock           # Lock screen
+
+# Move focus
+bind = $mainMod, left, movefocus, l
+bind = $mainMod, right, movefocus, r
+bind = $mainMod, up, movefocus, u
+bind = $mainMod, down, movefocus, d
+
+# Resize windows
+bind = $mainMod, minus, resizeactive, -100 0
+bind = $mainMod, plus, resizeactive, 100 0
+bind = $mainMod SHIFT, minus, resizeactive, 0 -100
+bind = $mainMod SHIFT, plus, resizeactive, 0 100
+```
+
+### Workspace Keybindings
+
+```conf
+# Switch to workspace 1-10
+bind = $mainMod, 1, workspace, 1
+bind = $mainMod, 2, workspace, 2
+# ... and so on
+
+# Move window to workspace
+bind = $mainMod SHIFT, 1, movetoworkspace, 1
+bind = $mainMod SHIFT, 2, movetoworkspace, 2
+# ... and so on
+
+# Special workspace (scratchpad)
+bind = $mainMod, S, togglespecialworkspace, magic
+bind = $mainMod SHIFT, S, movetoworkspace, special:magic
+```
+
+### System Keybindings
+
+```conf
+# Volume control
+bindel = ,XF86AudioRaiseVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+bindel = ,XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+bindel = ,XF86AudioMute, exec, wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+
+# Brightness control
+bindel = ,XF86MonBrightnessUp, exec, brightnessctl s 10%+
+bindel = ,XF86MonBrightnessDown, exec, brightnessctl s 10%-
+
+# Screenshots
+bind = , PRINT, exec, hyprshot -m output        # Full screen
+bind = shift, PRINT, exec, hyprshot -m region   # Region
+
+# Notifications
+bind = $mainMod, N, exec, swaync-client -t
+
+# Clipboard history
+bind = $mainMod, Q, exec, cliphist list | wofi --dmenu | cliphist decode | wl-copy
+
+# Theme selector
+bind = $mainMod SHIFT, return, exec, ~/.local/bin/theme-selector
+```
+
+<Tip>
+Use `bindel` for bindings that should repeat when held down (like volume/brightness).
+Use `bind` for one-time actions.
+</Tip>
+
+## Changing Fonts and Styling
+
+### Terminal Font (Ghostty)
+
+Edit `~/dotfiles/config/ghostty/config`:
+
+```conf
+# Font configuration
+font-family = JetBrainsMono Nerd Font
+font-size = 12
+font-feature = -calt  # Disable ligatures
+
+# Or enable ligatures
+# font-feature = +calt
+```
+
+### Waybar Font
+
+Edit `~/dotfiles/config/waybar/style.css`:
+
+```css
+* {
+  font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free";
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Specific module fonts */
+#clock {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#workspaces button {
+  font-size: 13px;
+}
+```
+
+### Wofi Font
+
+Edit `~/dotfiles/config/wofi/style.css`:
+
+```css
+window {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 14px;
+}
+```
+
+### System-wide Font Settings
+
+For GTK applications, create or edit `~/.config/gtk-3.0/settings.ini`:
+
+```ini
+[Settings]
+gtk-font-name=Inter 10
+```
+
+## Hyprland Visual Styling
+
+### Window Borders and Gaps
+
+Edit `~/dotfiles/config/hypr/hyprland.conf`:
+
+```conf
+general {
+    gaps_in = 4              # Gap between windows
+    gaps_out = 4             # Gap from screen edge
+    border_size = 1          # Border thickness
+
+    # Border colors (use theme variables)
+    col.active_border = rgb($blue)
+    col.inactive_border = rgb($grey0)
+
+    resize_on_border = false
+    layout = dwindle
+}
+```
+
+<Tip>
+Increase `gaps_in` and `gaps_out` for a more spacious look, or set them to 0 for maximum screen space.
+</Tip>
+
+### Window Rounding and Opacity
+
+```conf
+decoration {
+    rounding = 20           # Corner radius in pixels
+
+    # Window opacity
+    active_opacity = 0.95
+    inactive_opacity = 0.90
+
+    shadow {
+        enabled = true
+        range = 4
+        render_power = 3
+        color = rgb($bg0)
+    }
+
+    blur {
+        enabled = true
+        size = 10
+        ignore_opacity = true
+        noise = 0.08
+        contrast = 1.5
+        brightness = 0.8
+    }
+}
+```
+
+### Per-Application Opacity
+
+Override opacity for specific applications:
+
+```conf
+# VSCodium with custom opacity
+windowrule = opacity 0.95 0.85, class:codium
+
+# Brave browser fully opaque
+windowrule = opacity 1 1, class:brave-browser
+
+# Terminal with higher transparency
+windowrule = opacity 0.90 0.80, class:ghostty
+```
+
+### Animations
+
+Edit `~/dotfiles/config/hypr/animations.conf`:
+
+```conf
+animations {
+    enabled = true
+
+    # Animation curves: linear, ease, ease-in, ease-out, ease-in-out
+    bezier = smoothOut, 0.36, 0, 0.66, -0.56
+    bezier = smoothIn, 0.25, 1, 0.5, 1
+    bezier = overshot, 0.4, 0.8, 0.2, 1.2
+
+    animation = windows, 1, 4, overshot, slide
+    animation = windowsOut, 1, 4, smoothOut, slide
+    animation = border, 1, 10, default
+    animation = fade, 1, 8, smoothIn
+    animation = workspaces, 1, 5, overshot, slidevert
+}
+```
+
+To disable animations entirely:
+
+```conf
+animations {
+    enabled = false
+}
+```
+
+## Adding Applications to Autostart
+
+Edit `~/dotfiles/config/hypr/autostart.conf`:
+
+### Current Autostart Applications
+
+```conf
+# System services
+exec-once = dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+
+# Hyprland components
+exec-once = hyprpaper      # Wallpaper
+exec-once = waybar         # Status bar
+exec-once = swaync         # Notifications
+exec-once = hypridle       # Idle daemon
+exec-once = hyprsunset     # Night light
+
+# Clipboard
+exec-once = cliphist wipe
+exec-once = rm ~/.cache/cliphist/db
+exec-once = wl-paste --type text --watch cliphist store
+exec-once = wl-paste --type image --watch cliphist store
+```
+
+### Adding New Autostart Applications
+
+<Steps>
+  <Step title="Add the exec-once line">
+    ```conf
+    # Add to autostart.conf
+    exec-once = discord --enable-features=UseOzonePlatform --ozone-platform=wayland
+    exec-once = nm-applet --indicator  # Network manager tray
+    exec-once = blueman-applet         # Bluetooth tray
+    ```
+  </Step>
+
+  <Step title="For applications needing delays">
+    ```conf
+    # Run after 5 seconds
+    exec-once = sleep 5 && slack
+    ```
+  </Step>
+
+  <Step title="Reload Hyprland">
+    ```bash
+    # Logout and login again, or
+    hyprctl reload
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+Autostart applications run once per Hyprland session. To run them again without logging out, manually execute the command or use `exec` instead of `exec-once`.
+</Warning>
+
+### Conditionally Running Applications
+
+Create a startup script:
+
+```bash
+#!/bin/bash
+# ~/dotfiles/scripts/conditional-start
+
+# Only start Discord if not already running
+if ! pgrep -x "discord" > /dev/null; then
+    discord &
+fi
+
+# Only start on specific host
+if [[ $(hostname) == "laptop" ]]; then
+    nm-applet &
+fi
+```
+
+Then autostart the script:
+
+```conf
+exec-once = ~/.local/bin/conditional-start
+```
+
+## Waybar Module Customization
+
+### Understanding Waybar Structure
+
+Waybar uses two main files:
+- `config` - Module configuration and layout
+- `modules.json` - Individual module settings
+
+### Current Waybar Modules
+
+Edit `~/dotfiles/config/waybar/modules.json`:
+
+```json
+{
+  "custom/arch": {
+    "format": "",
+    "tooltip": true,
+    "tooltip-format": "I use Arch btw",
+    "on-click": "wlogout"
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+    "format-alt": "{:%H:%M | %e %b} ",
+    "timezone": "Europe/Madrid"
+  },
+  "cpu": {
+    "format": "  {usage}%",
+    "tooltip": true
+  },
+  "memory": {
+    "format": "  {}%",
+    "tooltip": true
+  }
+}
+```
+
+### Adding a New Module
+
+<Steps>
+  <Step title="Add module definition">
+    In `modules.json`, add your module:
+
+    ```json
+    "disk": {
+      "interval": 30,
+      "format": "  {percentage_used}%",
+      "path": "/",
+      "tooltip-format": "Used: {used} / Total: {total}"
+    }
+    ```
+  </Step>
+
+  <Step title="Add to layout">
+    In `config`, add the module to a section:
+
+    ```json
+    "modules-right": [
+      "cpu",
+      "memory",
+      "disk",      // New module
+      "pulseaudio",
+      "clock"
+    ]
+    ```
+  </Step>
+
+  <Step title="Restart Waybar">
+    ```bash
+    killall waybar && waybar &
+    ```
+  </Step>
+</Steps>
+
+### Custom Script Modules
+
+Example weather module (already included):
+
+```json
+"custom/weather": {
+  "format": "{}",
+  "exec": "/home/nico/.local/bin/weather",
+  "interval": 1800,
+  "tooltip": true
+}
+```
+
+Create your own script in `~/dotfiles/scripts/`:
+
+```bash
+#!/bin/bash
+# ~/dotfiles/scripts/my-module
+
+echo "📊 Custom Data"
+```
+
+Add to Waybar:
+
+```json
+"custom/mymodule": {
+  "format": "{}",
+  "exec": "~/.local/bin/my-module",
+  "interval": 60
+}
+```
+
+### Styling Waybar Modules
+
+Edit `~/dotfiles/config/waybar/style.css`:
+
+```css
+/* Highlight critical CPU usage */
+#cpu.critical {
+  color: @red;
+  animation: blink 1s infinite;
+}
+
+/* Custom clock styling */
+#clock {
+  background: @bg2;
+  color: @blue;
+  padding: 0 15px;
+  margin: 5px;
+  border-radius: 10px;
+}
+
+/* Pulse animation for custom module */
+#custom-mymodule {
+  color: @green;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+```
+
+## Neovim Plugin Additions
+
+Neovim plugins are managed in `~/dotfiles/config/nvim/lua/plugins/`.
+
+### Adding a New Plugin
+
+<Steps>
+  <Step title="Create plugin file">
+    ```bash
+    nvim ~/dotfiles/config/nvim/lua/plugins/my-plugin.lua
+    ```
+  </Step>
+
+  <Step title="Define the plugin">
+    ```lua
+    return {
+      {
+        "plugin/author",
+        lazy = false,  -- Load on startup
+        config = function()
+          require("plugin").setup({
+            -- Configuration here
+          })
+        end,
+      },
+    }
+    ```
+  </Step>
+
+  <Step title="Reload Neovim">
+    In Neovim, run:
+    ```vim
+    :Lazy sync
+    ```
+  </Step>
+</Steps>
+
+### Example: Adding a File Tree Plugin
+
+```lua
+-- ~/dotfiles/config/nvim/lua/plugins/neo-tree.lua
+return {
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+    },
+    config = function()
+      require("neo-tree").setup({
+        window = {
+          width = 30,
+        },
+      })
+    end,
+    keys = {
+      { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Toggle Neo-tree" },
+    },
+  },
+}
+```
+
+<Tip>
+The Kanagawa dotfiles likely use LazyVim or Lazy.nvim for plugin management. Check the existing plugin files for examples.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Adding Themes" href="/guides/adding-themes" icon="palette">
+    Create custom color themes
+  </Card>
+  
+  <Card title="Troubleshooting" href="/guides/troubleshooting" icon="wrench">
+    Fix common configuration issues
+  </Card>
+</CardGroup>

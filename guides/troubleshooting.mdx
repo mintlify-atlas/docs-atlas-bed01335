@@ -1,0 +1,636 @@
+---
+title: Troubleshooting
+description: Solutions to common issues with Kanagawa dotfiles installation and configuration
+---
+
+## Installation Problems
+
+<AccordionGroup>
+  <Accordion title="Stow says 'WARNING! stowing would cause conflicts'">
+    This occurs when files already exist at the target location.
+
+    **Solution:**
+
+    ```bash
+    # Backup existing configurations
+    mv ~/.config/hypr ~/.config/hypr.backup
+    mv ~/.config/waybar ~/.config/waybar.backup
+    # etc.
+
+    # Then run stow again
+    cd ~/dotfiles
+    stow -v -R -t ~/.config config
+    ```
+
+    **Alternative approach:**
+
+    ```bash
+    # Force stow to adopt existing files
+    cd ~/dotfiles
+    stow --adopt -t ~/.config config
+
+    # This moves existing files into your dotfiles repo
+    # Review changes with:
+    git diff
+
+    # If you don't want those changes:
+    git restore .
+    ```
+  </Accordion>
+
+  <Accordion title="Missing dependencies after installation">
+    The install script only creates symlinks, it doesn't install packages.
+
+    **Solution:**
+
+    Install required packages manually:
+
+    ```bash
+    # Core Hyprland components
+    sudo pacman -S hyprland hyprpaper hypridle hyprlock
+
+    # Status bar and notifications
+    sudo pacman -S waybar swaync
+
+    # Terminal and launcher
+    sudo pacman -S ghostty wofi
+
+    # System utilities
+    sudo pacman -S brightnessctl wpctl playerctl
+
+    # Clipboard and screenshots
+    yay -S cliphist hyprshot
+
+    # Shell and tools
+    sudo pacman -S zsh btop cava fastfetch
+
+    # Editors
+    sudo pacman -S neovim
+    yay -S vscodium-bin
+    ```
+
+    <Tip>
+    Check the main README or documentation for a complete dependency list.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Fonts not displaying correctly (showing squares/boxes)">
+    You're missing Nerd Fonts which provide icons and glyphs.
+
+    **Solution:**
+
+    ```bash
+    # Install JetBrains Mono Nerd Font
+    yay -S ttf-jetbrains-mono-nerd
+
+    # Or install all Nerd Fonts
+    yay -S nerd-fonts-complete
+
+    # Update font cache
+    fc-cache -fv
+
+    # Logout and login again
+    ```
+
+    **Verify fonts are installed:**
+
+    ```bash
+    fc-list | grep -i "JetBrains"
+    ```
+  </Accordion>
+
+  <Accordion title="Permission denied when running install.sh">
+    The script isn't executable.
+
+    **Solution:**
+
+    ```bash
+    chmod +x ~/dotfiles/install.sh
+    ./install.sh
+    ```
+  </Accordion>
+
+  <Accordion title="Scripts in ~/.local/bin not found">
+    The directory isn't in your PATH.
+
+    **Solution:**
+
+    Add to your `~/.zshrc` or `~/.bashrc`:
+
+    ```bash
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+
+    Then reload:
+
+    ```bash
+    source ~/.zshrc
+    # or
+    source ~/.bashrc
+    ```
+
+    **Verify it's in PATH:**
+
+    ```bash
+    echo $PATH | grep -o '.local/bin'
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Theme Not Applying Correctly
+
+<AccordionGroup>
+  <Accordion title="Theme switcher script not found">
+    The scripts weren't stowed to `~/.local/bin`.
+
+    **Solution:**
+
+    ```bash
+    cd ~/dotfiles
+    stow -v -R -t ~/.local/bin scripts
+
+    # Verify script exists
+    ls -la ~/.local/bin/theme-switcher
+
+    # Make sure it's executable
+    chmod +x ~/.local/bin/theme-switcher
+    ```
+  </Accordion>
+
+  <Accordion title="Theme changes but some components don't update">
+    Some components require manual reload.
+
+    **Solution:**
+
+    ```bash
+    # After running theme-switcher, manually reload:
+
+    # Reload Hyprland
+    hyprctl reload
+
+    # Restart Waybar
+    killall waybar && waybar &
+
+    # Reload Ghostty
+    killall -SIGUSR2 ghostty
+
+    # Reload Swaync
+    swaync-client -rs
+
+    # Close and reopen Wofi (no persistent daemon)
+    # Just launch it again: Super + Space
+    ```
+
+    <Tip>
+    The theme-switcher script should do this automatically. If it doesn't, the script might have errors.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Colors file not found error">
+    The theme files are missing or not properly stowed.
+
+    **Solution:**
+
+    ```bash
+    # Check if theme files exist
+    ls -la ~/dotfiles/config/hypr/colors/custom/
+    ls -la ~/dotfiles/config/waybar/colors/custom/
+
+    # If they exist but aren't linked:
+    cd ~/dotfiles
+    stow -v -R -t ~/.config config
+
+    # Verify symlinks
+    ls -la ~/.config/hypr/colors/
+    ls -la ~/.config/waybar/colors/
+    ```
+  </Accordion>
+
+  <Accordion title="VSCodium theme not changing">
+    The theme extension isn't installed or the name is wrong.
+
+    **Solution:**
+
+    1. Check if the theme is installed in VSCodium:
+       - Open VSCodium
+       - Go to Extensions (`Ctrl+Shift+X`)
+       - Search for the theme (e.g., "Kanagawa", "Gruvbox")
+       - Install if not present
+
+    2. Verify theme name in theme-switcher script:
+
+       ```bash
+       nvim ~/dotfiles/scripts/theme-switcher
+
+       # Check the VSCODIUM_THEME variable matches exactly:
+       # Line ~33:
+       kanagawa)
+         VSCODIUM_THEME="Kanagawa Wave"  # Must match extension name
+       ```
+
+    3. Check VSCodium settings:
+
+       ```bash
+       cat ~/.config/VSCodium/User/settings.json | grep colorTheme
+       ```
+  </Accordion>
+
+  <Accordion title="Neovim colors broken or wrong theme">
+    The colorscheme plugin isn't installed or theme_bridge.lua is incorrect.
+
+    **Solution:**
+
+    ```bash
+    # Check theme bridge file
+    cat ~/.config/nvim/lua/theme_bridge.lua
+    # Should return something like: return 'kanagawa'
+
+    # Open Neovim and check for plugin errors
+    nvim
+    :checkhealth
+
+    # Install/sync plugins
+    :Lazy sync
+
+    # Try setting colorscheme manually
+    :colorscheme kanagawa
+    ```
+
+    If the colorscheme isn't installed:
+
+    ```bash
+    # Add to your plugin config
+    # ~/.config/nvim/lua/plugins/colorscheme.lua
+    return {
+      {
+        "rebelot/kanagawa.nvim",
+        lazy = false,
+        priority = 1000,
+      },
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Wallpaper not changing with theme">
+    No wallpaper files match the theme name.
+
+    **Solution:**
+
+    ```bash
+    # Check for wallpapers
+    ls ~/.config/hypr/wallpapers/
+
+    # Wallpapers should be named: themename-description.png
+    # For example:
+    # kanagawa-wave.png
+    # gruvbox-mountain.png
+
+    # Add wallpaper for your theme
+    cp /path/to/wallpaper.png ~/.config/hypr/wallpapers/themename-wall.png
+
+    # Run theme switcher again
+    theme-switcher themename
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Service Reload Issues
+
+<AccordionGroup>
+  <Accordion title="Waybar won't reload or keeps crashing">
+    Configuration syntax error or missing module.
+
+    **Solution:**
+
+    ```bash
+    # Test Waybar in terminal to see errors
+    killall waybar
+    waybar
+
+    # Check for JSON syntax errors
+    cat ~/.config/waybar/config | jq .
+    cat ~/.config/waybar/modules.json | jq .
+
+    # Check logs
+    journalctl --user -u waybar -n 50
+    ```
+
+    Common errors:
+    - Missing comma in JSON
+    - Invalid module name
+    - Incorrect CSS color syntax
+  </Accordion>
+
+  <Accordion title="Ghostty not reloading colors">
+    Hot-reload signal not working or old Ghostty version.
+
+    **Solution:**
+
+    ```bash
+    # Try reload signal
+    killall -SIGUSR2 ghostty
+
+    # If that doesn't work, fully restart
+    killall ghostty
+    # Then open new terminal (Super + T)
+
+    # Verify color file exists
+    cat ~/.config/ghostty/colors/colors
+    # Should show: config-file = custom/themename
+
+    # Check actual theme file
+    cat ~/.config/ghostty/colors/custom/kanagawa
+    ```
+  </Accordion>
+
+  <Accordion title="Swaync (notifications) not updating theme">
+    CSS not reloading properly.
+
+    **Solution:**
+
+    ```bash
+    # Reload Swaync CSS
+    swaync-client -rs
+
+    # If that doesn't work, restart the daemon
+    killall swaync
+    swaync &
+
+    # Test notification
+    notify-send "Test" "This is a test notification"
+
+    # Check CSS file
+    cat ~/.config/swaync/colors/colors.css
+    ```
+  </Accordion>
+
+  <Accordion title="Hyprpaper wallpaper commands fail">
+    Hyprpaper daemon isn't running.
+
+    **Solution:**
+
+    ```bash
+    # Check if hyprpaper is running
+    pgrep hyprpaper
+
+    # If not running, start it
+    hyprpaper &
+
+    # Wait a second, then apply theme
+    theme-switcher kanagawa
+
+    # Add to autostart if missing
+    echo "exec-once = hyprpaper" >> ~/.config/hypr/autostart.conf
+    ```
+  </Accordion>
+
+  <Accordion title="Wofi shows old colors">
+    Wofi doesn't have a daemon, it reads CSS on launch.
+
+    **Solution:**
+
+    Just close Wofi and reopen it:
+
+    ```bash
+    # Press Escape to close Wofi
+    # Then reopen: Super + Space
+    ```
+
+    Verify CSS is correct:
+
+    ```bash
+    cat ~/.config/wofi/colors/colors.css
+    # Should have: @import url("/home/user/.config/wofi/colors/custom/themename.css");
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Hyprland Configuration Errors
+
+<AccordionGroup>
+  <Accordion title="Hyprland won't start or crashes on login">
+    Syntax error in configuration files.
+
+    **Solution:**
+
+    ```bash
+    # Switch to TTY (Ctrl+Alt+F3)
+    # Login and check Hyprland logs
+    cat ~/.hyprland/hyprland.log | tail -50
+
+    # Or use journalctl
+    journalctl --user -xe | grep hyprland
+
+    # Test config syntax
+    hyprctl reload
+    # Will show line number of error
+    ```
+
+    Common errors:
+    - Missing `source` file
+    - Invalid color format (missing `rgb()` wrapper)
+    - Typo in variable name
+    - Missing closing brace `}`
+  </Accordion>
+
+  <Accordion title="Colors not working (showing white/black)">
+    Theme variables not loaded or syntax error.
+
+    **Solution:**
+
+    ```bash
+    # Check if colors.conf is sourced
+    head -1 ~/.config/hypr/hyprland.conf
+    # Should have: source = ./colors/colors.conf
+
+    # Check colors.conf points to a theme
+    cat ~/.config/hypr/colors/colors.conf
+    # Should have: source = ~/.config/hypr/colors/custom/kanagawa.conf
+
+    # Verify theme file exists and has content
+    cat ~/.config/hypr/colors/custom/kanagawa.conf
+
+    # Test color syntax in hyprland.conf
+    # Correct:   col.active_border = rgb($blue)
+    # Wrong:     col.active_border = $blue
+    # Wrong:     col.active_border = rgb(#7E9CD8)
+    ```
+  </Accordion>
+
+  <Accordion title="Keybinding doesn't work">
+    Conflict with existing binding or wrong key name.
+
+    **Solution:**
+
+    ```bash
+    # Check current bindings
+    hyprctl binds | grep -i "your-key"
+
+    # Test key name
+    # Run this, then press the key:
+    wev
+    # Note the key name it shows
+
+    # Check for conflicts in keybindings.conf
+    grep "your-key" ~/.config/hypr/keybindings.conf
+
+    # Reload after changes
+    hyprctl reload
+    ```
+  </Accordion>
+
+  <Accordion title="Monitor configuration not working">
+    Wrong monitor identifier or invalid settings.
+
+    **Solution:**
+
+    ```bash
+    # List available monitors
+    hyprctl monitors
+
+    # Check monitors.conf
+    cat ~/.config/hypr/monitors.conf
+
+    # Example correct syntax:
+    # monitor=DP-1,1920x1080@60,0x0,1
+    # monitor=,preferred,auto,1  # For all monitors
+
+    # Test with hyprctl
+    hyprctl keyword monitor "DP-1,1920x1080@60,0x0,1"
+    ```
+  </Accordion>
+
+  <Accordion title="Animations not working or laggy">
+    GPU driver issue or wrong animation config.
+
+    **Solution:**
+
+    ```bash
+    # Check if animations are enabled
+    cat ~/.config/hypr/animations.conf | grep "enabled"
+
+    # Test disabling animations
+    hyprctl keyword animations:enabled false
+
+    # If that fixes lag, reduce animation complexity:
+    # Edit animations.conf, reduce animation duration:
+    # animation = windows, 1, 2, default  # Reduced from 4 to 2
+
+    # Check GPU
+    glxinfo | grep "OpenGL renderer"
+
+    # For NVIDIA, ensure env vars are set in hyprland.conf:
+    # env = LIBVA_DRIVER_NAME,nvidia
+    # env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+    ```
+  </Accordion>
+
+  <Accordion title="Blur not working or looks wrong">
+    Blur settings incompatible with GPU or wrong opacity.
+
+    **Solution:**
+
+    ```bash
+    # Check blur settings in hyprland.conf
+    cat ~/.config/hypr/hyprland.conf | grep -A 10 "blur {"
+
+    # Try simpler blur settings:
+    decoration {
+        blur {
+            enabled = true
+            size = 5           # Reduced from 10
+            passes = 1         # Reduced from 2
+            ignore_opacity = true
+        }
+    }
+
+    # Reload
+    hyprctl reload
+
+    # If still not working, disable xray:
+    blur {
+        xray = false
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Getting Help
+
+<Warning>
+Before asking for help, gather relevant information:
+- Output of failing command
+- Relevant log files
+- Your system info (`neofetch` or `fastfetch`)
+- What you've already tried
+</Warning>
+
+### Useful Debug Commands
+
+```bash
+# Check Hyprland version
+hyprctl version
+
+# View Hyprland logs
+cat ~/.hyprland/hyprland.log
+
+# Check systemd user services
+systemctl --user status
+
+# View recent journal entries
+journalctl --user -n 100
+
+# Test if a program is running
+pgrep -a waybar
+pgrep -a hyprpaper
+
+# Check symlink status
+ls -la ~/.config/hypr
+ls -la ~/.config/waybar
+
+# Verify dotfiles stow status
+cd ~/dotfiles
+stow -n -v -t ~/.config config  # Dry run
+```
+
+### Log Locations
+
+```plaintext
+~/.hyprland/hyprland.log          - Hyprland logs
+~/.config/waybar/                 - Check terminal output
+~/.cache/                         - Various app caches
+journalctl --user                 - Systemd user logs
+```
+
+### Common Log Patterns to Look For
+
+```bash
+# Errors in Hyprland log
+grep -i "error" ~/.hyprland/hyprland.log
+
+# Missing files
+grep -i "no such file" ~/.hyprland/hyprland.log
+
+# Config syntax errors
+grep -i "syntax" ~/.hyprland/hyprland.log
+```
+
+## Still Having Issues?
+
+<CardGroup cols={2}>
+  <Card title="Hyprland Wiki" icon="book" href="https://wiki.hyprland.org/">
+    Official Hyprland documentation
+  </Card>
+  
+  <Card title="GitHub Issues" icon="github" href="https://github.com/nixer112/dotfiles/issues">
+    Report bugs or ask questions
+  </Card>
+  
+  <Card title="Arch Wiki" icon="linux" href="https://wiki.archlinux.org/">
+    General Arch Linux help
+  </Card>
+  
+  <Card title="Configuration Guide" href="/guides/customization" icon="sliders">
+    Return to customization guide
+  </Card>
+</CardGroup>

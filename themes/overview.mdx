@@ -1,0 +1,221 @@
+---
+title: Theme System Overview
+description: Comprehensive theming system for your entire Wayland environment
+icon: palette
+---
+
+The Kanagawa dotfiles come with a unified theming system that applies consistent color schemes across your entire desktop environment. With a single command, you can switch themes for all applications simultaneously.
+
+## Available Themes
+
+<CardGroup cols={2}>
+  <Card title="Kanagawa" icon="wave">
+    **Warm and subtle** - Inspired by Japanese Sumi Ink paintings
+    
+    Deep navy backgrounds with soft, muted accent colors reminiscent of traditional Japanese art.
+  </Card>
+  
+  <Card title="Gruvbox" icon="box">
+    **Retro warm contrast** - Classic warm color palette
+    
+    Earthy browns and warm backgrounds with high contrast, perfect for long coding sessions.
+  </Card>
+  
+  <Card title="Catppuccin" icon="mug-hot">
+    **Pastel perfection** - Smooth and creamy colors
+    
+    Soft pastel colors with a cozy, comfortable aesthetic that's easy on the eyes.
+  </Card>
+  
+  <Card title="Everforest" icon="tree">
+    **Forest inspired** - Natural green tones
+    
+    Comfortable green-focused palette inspired by nature, providing a calming workspace.
+  </Card>
+</CardGroup>
+
+## What Gets Themed
+
+The theme system applies colors to every component of your desktop environment:
+
+<AccordionGroup>
+  <Accordion title="Window Manager & Desktop" icon="window-maximize">
+    - **Hyprland**: Window borders, gaps, and accent colors
+    - **Waybar**: Status bar background, text, and module colors
+    - **Wofi**: Application launcher styling
+    - **SwayNC**: Notification center appearance
+    - **Wlogout**: Logout menu colors
+  </Accordion>
+  
+  <Accordion title="Terminal & Shell" icon="terminal">
+    - **Ghostty**: Terminal color palette (16 colors + background/foreground)
+    - **Zellij**: Terminal multiplexer UI colors
+    - **Cava**: Audio visualizer color gradients
+  </Accordion>
+  
+  <Accordion title="Editors & Development" icon="code">
+    - **Neovim**: Editor theme via theme_bridge.lua
+    - **VSCodium**: Workspace color theme
+    - **Btop**: System monitor colors
+  </Accordion>
+</AccordionGroup>
+
+## Color Scheme Example
+
+Here's how the Kanagawa theme defines its color palette:
+
+<CodeGroup>
+```conf Hyprland (colors.conf)
+##############################################################
+## Tema: Kanagawa                                           ##
+## Descripción: Paleta de colores cálida y suave (Sumi Ink) ##
+##############################################################
+
+# Backgrounds (Tonos Sumi Ink)
+$bg0 = 16161D # sumiInk0 (Más oscuro)
+$bg1 = 1F1F28 # sumiInk1 (Fondo principal)
+$bg2 = 2A2A37 # sumiInk2
+$bg3 = 363646 # sumiInk3
+$bg4 = 54546D # sumiInk4
+
+# Foreground (Texto principal)
+$fg  = DCD7BA # fujiWhite
+
+# Colores Principales
+$red    = C34043 # samuraiRed
+$orange = FFA066 # surimiOrange
+$yellow = E6C384 # springYellow
+$green  = 98BB6C # autumnGreen
+$aqua   = 7AA89F # waveAqua1
+$blue   = 7E9CD8 # crystalBlue
+$purple = 957FB8 # oniViolet
+$pink   = D27E99 # sakuraPink
+```
+
+```css Waybar (colors.css)
+/**************************************************************
+** Tema: Kanagawa                                           **
+** Descripción: Paleta de colores cálida y suave (Sumi Ink) **
+**************************************************************/
+
+/* Backgrounds (Tonos Sumi Ink) */
+@define-color bg0 #16161D;
+@define-color bg1 #1F1F28;
+@define-color bg2 #2A2A37;
+@define-color bg3 #363646;
+@define-color bg4 #54546D;
+
+/* Foreground (Texto principal) */
+@define-color fg  #DCD7BA;
+
+/* Colores Principales */
+@define-color red    #C34043;
+@define-color orange #FFA066;
+@define-color yellow #E6C384;
+@define-color green  #98BB6C;
+@define-color aqua   #7AA89F;
+@define-color blue   #7E9CD8;
+@define-color purple #957FB8;
+@define-color pink   #D27E99;
+```
+
+```ini Ghostty (terminal colors)
+palette = 0=#16161d
+palette = 1=#c34043
+palette = 2=#76946a
+palette = 3=#c0a36e
+palette = 4=#7e9cd8
+palette = 5=#957fb8
+palette = 6=#6a9589
+palette = 7=#c8c093
+palette = 8=#727169
+palette = 9=#e82424
+palette = 10=#98bb6c
+palette = 11=#e6c384
+palette = 12=#7fb4ca
+palette = 13=#938aa9
+palette = 14=#7aa89f
+palette = 15=#dcd7ba
+
+background = #1f1f28
+foreground = #dcd7ba
+cursor-color = #c8c093
+selection-background = #2d4f67
+selection-foreground = #c8c093
+```
+</CodeGroup>
+
+## Theme Organization
+
+Themes are organized in a consistent structure across all config directories:
+
+```plaintext
+~/.config/
+├── hypr/colors/
+│   ├── colors.conf              # Active theme (symlink/import)
+│   └── custom/
+│       ├── kanagawa.conf
+│       ├── gruvbox.conf
+│       ├── catppuccin.conf
+│       └── everforest.conf
+├── waybar/colors/
+│   ├── colors.css
+│   └── custom/
+│       ├── kanagawa.css
+│       ├── gruvbox.css
+│       ├── catppuccin.css
+│       └── everforest.css
+├── ghostty/colors/
+│   ├── colors                   # Active theme config
+│   └── custom/
+│       ├── kanagawa
+│       ├── gruvbox
+│       ├── catppuccin
+│       └── everforest
+├── btop/themes/
+│   ├── colors.theme             # Symlink to active theme
+│   └── custom/
+│       ├── kanagawa.theme
+│       ├── gruvbox.theme
+│       ├── catppuccin.theme
+│       └── everforest.theme
+└── nvim/lua/
+    └── theme_bridge.lua         # Theme name for Neovim
+```
+
+<Note>
+Each application has a `colors` file that points to the active theme, and a `custom/` directory containing all available theme definitions.
+</Note>
+
+## How Themes Work
+
+The theme system uses different strategies based on the application:
+
+1. **Import-based** (Hyprland, Waybar, Wofi, SwayNC, Wlogout)
+   - Main `colors.conf`/`colors.css` file contains an import statement
+   - Points to the selected theme in `custom/` directory
+
+2. **Config file reference** (Ghostty)
+   - Uses `config-file` directive to load theme from `custom/`
+
+3. **Symlink-based** (Btop, Cava)
+   - Active `colors.theme`/`colors` file is a symlink to the chosen theme
+
+4. **Bridge file** (Neovim)
+   - `theme_bridge.lua` returns the theme name as a Lua string
+   - LazyVim reads this value to load the appropriate colorscheme
+
+5. **JSON editing** (VSCodium)
+   - Theme name is written directly to `settings.json`
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Switch Themes" icon="arrows-rotate" href="/themes/switching">
+    Learn how to switch themes interactively or via command line
+  </Card>
+  
+  <Card title="Create Custom Themes" icon="paintbrush" href="/themes/customization">
+    Build your own theme with custom colors and styles
+  </Card>
+</CardGroup>

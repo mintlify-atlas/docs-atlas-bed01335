@@ -1,0 +1,313 @@
+---
+title: 'Waybar Configuration'
+description: 'Waybar status bar configuration and module setup'
+icon: 'rectangle-vertical'
+---
+
+## Overview
+
+Waybar is the status bar used in the Kanagawa dotfiles, providing system information, workspace indicators, and quick access to system controls.
+
+<Note>
+Waybar configuration uses JSON/JSONC format and is split between `config` (structure) and `modules.json` (module definitions).
+</Note>
+
+## Configuration Structure
+
+```bash
+~/.config/waybar/
+├── config           # Main configuration (layout)
+├── modules.json     # Module definitions
+├── style.css        # Styling and theming
+└── scripts/         # Custom scripts
+    └── weather      # Weather information script
+```
+
+## Main Configuration
+
+The main config file defines the bar layout and module positions:
+
+```jsonc
+{
+  "layer": "top",
+  "position": "top",
+  "height": 36,
+  "spacing": 4,
+  
+  "modules-left": [
+    "custom/arch",
+    "hyprland/workspaces"
+  ],
+  
+  "modules-center": [
+    "clock",
+    "custom/weather"
+  ],
+  
+  "modules-right": [
+    "pulseaudio",
+    "network",
+    "backlight",
+    "battery",
+    "battery#bat2",
+    "wlogout"
+  ],
+  
+  "include": [
+    "~/.config/waybar/modules.json"
+  ]
+}
+```
+
+<Tabs>
+  <Tab title="Left Modules">
+    ## Left Side Modules
+
+    <CardGroup cols={2}>
+      <Card title="Arch Logo" icon="linux">
+        Custom Arch Linux logo with tooltip and wlogout integration
+      </Card>
+      <Card title="Workspaces" icon="grid">
+        Hyprland workspace indicator with custom styling
+      </Card>
+    </CardGroup>
+
+    ### Arch Logo Module
+
+    ```json
+    "custom/arch": {
+      "format": "",
+      "tooltip": true,
+      "tooltip-format": "I use Arch btw",
+      "on-click": "wlogout"
+    }
+    ```
+
+    ### Workspaces Module
+
+    ```json
+    "hyprland/workspaces": {
+      "disable-scroll": true,
+      "all-outputs": true,
+      "warp-on-scroll": false,
+      "format": "{name}",
+      "format-icons": {
+        "urgent": "",
+        "active": "",
+        "default": ""
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="Center Modules">
+    ## Center Modules
+
+    ### Clock Module
+
+    ```json
+    "clock": {
+      "format": "{:%H:%M}",
+      "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+      "format-alt": "{:%H:%M | %e %b} ",
+      "timezone": "Europe/Madrid"
+    }
+    ```
+
+    The clock displays time in 24-hour format and shows a calendar on hover.
+
+    ### Weather Module
+
+    ```json
+    "custom/weather": {
+      "format": "{}",
+      "exec": "/home/nico/.local/bin/weather",
+      "interval": 1800,
+      "tooltip": true
+    }
+    ```
+
+    <Note>
+    Weather information updates every 30 minutes (1800 seconds) using a custom script.
+    </Note>
+  </Tab>
+
+  <Tab title="Right Modules">
+    ## Right Side Modules
+
+    ### Audio Module
+
+    ```json
+    "pulseaudio": {
+      "format": "{icon} {volume}%",
+      "format-bluetooth": "{icon}  {volume}%  {format_source}",
+      "format-bluetooth-muted": "  {icon}  {format_source}",
+      "format-muted": "󰋐 {format_source}",
+      "format-source": " {volume}%",
+      "format-source-muted": "",
+      "format-icons": {
+        "headphone": "",
+        "hands-free": "",
+        "headset": "",
+        "phone": "",
+        "portable": "",
+        "car": "",
+        "default": ["", "", ""]
+      },
+      "on-click": "pavucontrol"
+    }
+    ```
+
+    Click to open PulseAudio Volume Control (pavucontrol).
+
+    ### Network Module
+
+    ```json
+    "network": {
+      "format-wifi": " {essid}",
+      "format-ethernet": "{ipaddr}/{cidr} ",
+      "tooltip-format": "{ifname} via {gwaddr} ({signalStrength}%)",
+      "format-linked": "{ifname} (No IP) ",
+      "format-disconnected": "Disconnected ⚠",
+      "on-click": "nm-connection-editor"
+    }
+    ```
+
+    ### Backlight Module
+
+    ```json
+    "backlight": {
+      "format": "{percent}% {icon}",
+      "format-icons": [
+        "", "", "", "", 
+        "", "", "", "", ""
+      ]
+    }
+    ```
+
+    ### Battery Modules
+
+    ```json
+    "battery": {
+      "states": {
+        "warning": 30,
+        "critical": 15
+      },
+      "format": "{icon} {capacity}%",
+      "format-full": "{icon} {capacity}%",
+      "format-charging": "󰂄 {capacity}%",
+      "format-plugged": "󰂉 {capacity}%",
+      "format-alt": "{time} {icon}",
+      "format-icons": [
+        "", "", "", "", ""
+      ]
+    }
+    ```
+
+    <Warning>
+    Battery warnings appear at 30% (warning) and 15% (critical) levels.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Module Features
+
+<CardGroup cols={2}>
+  <Card title="System Monitoring" icon="chart-line">
+    Track CPU, memory, temperature, and network status
+  </Card>
+  <Card title="Power Management" icon="battery-full">
+    Battery status with dual battery support
+  </Card>
+  <Card title="Audio Control" icon="volume-high">
+    PulseAudio integration with multiple device support
+  </Card>
+  <Card title="Custom Scripts" icon="code">
+    Weather and other custom information modules
+  </Card>
+</CardGroup>
+
+## Optional Modules
+
+Several modules are commented out in the default configuration:
+
+<Accordion title="Available Optional Modules">
+  ```jsonc
+  // Commented out by default:
+  "idle_inhibitor"     // Prevent screen sleep
+  "cpu"                // CPU usage percentage
+  "memory"             // RAM usage
+  "temperature"        // System temperature
+  "hyprland/language" // Keyboard layout indicator
+  ```
+
+  Uncomment these in the config file to enable them.
+</Accordion>
+
+## Custom Scripts Integration
+
+Waybar supports custom scripts for extending functionality:
+
+### Weather Script
+
+Location: `~/.local/bin/weather`
+
+```json
+"custom/weather": {
+  "format": "{}",
+  "exec": "/home/nico/.local/bin/weather",
+  "interval": 1800,
+  "tooltip": true
+}
+```
+
+The weather script runs every 30 minutes to fetch and display weather information.
+
+## Theme Integration
+
+Waybar automatically integrates with the Kanagawa color scheme through `style.css`:
+
+<Steps>
+  <Step title="Colors Sourced">
+    Colors are pulled from the active theme in `~/.config/colors/`
+  </Step>
+  <Step title="Dynamic Updates">
+    When you switch themes, Waybar reloads with new colors
+  </Step>
+  <Step title="CSS Styling">
+    All styling is defined in `style.css` with theme variables
+  </Step>
+</Steps>
+
+## Click Actions
+
+Many modules support click actions for quick access:
+
+| Module | Action | Opens |
+|--------|--------|-------|
+| `custom/arch` | Click | wlogout (power menu) |
+| `pulseaudio` | Click | pavucontrol (volume mixer) |
+| `network` | Click | nm-connection-editor (network settings) |
+| `battery` | Click | Power menu script |
+
+## System Integration
+
+<CardGroup cols={2}>
+  <Card title="Hyprland Integration" icon="layer-group">
+    Native workspace and window information
+  </Card>
+  <Card title="Auto-reload" icon="rotate">
+    Automatically reloads on config changes
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Styling" icon="paintbrush" href="/themes/overview">
+    Customize Waybar appearance
+  </Card>
+  <Card title="Scripts" icon="terminal" href="/scripts/theme-selector">
+    Learn about custom scripts
+  </Card>
+</CardGroup>

@@ -1,0 +1,234 @@
+---
+title: 'Hyprland Configuration'
+description: 'Complete guide to Hyprland compositor configuration in Kanagawa dotfiles'
+icon: 'desktop'
+---
+
+## Overview
+
+Hyprland is the core Wayland compositor for the Kanagawa setup. The configuration follows a modular structure with separate files for different aspects like keybindings, animations, colors, and monitors.
+
+<Note>
+The main configuration file sources several modules, making it easy to customize individual aspects without touching the core config.
+</Note>
+
+## Configuration Structure
+
+The Hyprland configuration is split into multiple files for better organization:
+
+```bash
+~/.config/hypr/
+├── hyprland.conf        # Main configuration file
+├── keybindings.conf     # All keyboard shortcuts
+├── animations.conf      # Animation settings
+├── colors/colors.conf   # Color scheme
+├── monitors.conf        # Monitor configuration
+└── autostart.conf       # Startup programs
+```
+
+## Main Configuration
+
+The main `hyprland.conf` file sources all modules and defines the core compositor settings:
+
+```conf
+source = ./colors/colors.conf # Color scheme
+source = ./monitors.conf # Monitor configuration
+source = ./keybindings.conf # Keyboard shortcuts
+source = ./animations.conf # Animation settings
+source = ./autostart.conf # Programs to autostart
+```
+
+## Environment Variables
+
+Hyprland sets up several environment variables for optimal compatibility:
+
+```conf
+# NVIDIA specific
+env = LIBVA_DRIVER_NAME,nvidia
+env = __GLX_VENDOR_LIBRARY_NAME,nvidia
+
+# Wayland support
+env = ELECTRON_OZONE_PLATFORM_HINT,auto
+env = ELECTRON_ENABLE_WAYLAND,1
+env = NIXOS_OZONE_WL,1
+
+# Cursor configuration
+env = XCURSOR_SIZE,24
+env = HYPRCURSOR_THEME,rose-pine-hyprcursor
+env = HYPRCURSOR_SIZE,30
+```
+
+<Tabs>
+  <Tab title="General Settings">
+    ## General Configuration
+
+    ```conf
+    general {
+        gaps_in = 4
+        gaps_out = 4
+        border_size = 1
+        
+        col.active_border = rgb($blue)
+        col.inactive_border = rgb($grey0)
+        
+        resize_on_border = false
+        allow_tearing = false
+        layout = dwindle
+    }
+    ```
+
+    The general block controls window gaps, borders, and layout behavior.
+  </Tab>
+
+  <Tab title="Decoration">
+    ## Window Decoration
+
+    ```conf
+    decoration {
+        rounding = 20
+        
+        active_opacity = 0.95
+        inactive_opacity = 0.90
+        
+        shadow {
+            enabled = true
+            range = 4
+            render_power = 3
+            color = rgb($bg0)
+        }
+        
+        blur {
+            enabled = true
+            size = 10
+            ignore_opacity = true
+            noise = 0.08
+            contrast = 1.5
+            brightness = 0.8
+            xray = false
+            new_optimizations = true
+        }
+    }
+    ```
+
+    Features include rounded corners (20px), transparency, shadows, and optimized blur effects.
+  </Tab>
+
+  <Tab title="Input">
+    ## Input Configuration
+
+    ```conf
+    input {
+        kb_layout = es
+        follow_mouse = 1
+        sensitivity = 0
+        
+        touchpad {
+            natural_scroll = true
+        }
+    }
+    
+    gestures {
+        gesture = 3, horizontal, workspace
+    }
+    ```
+
+    Configured for Spanish keyboard layout with natural touchpad scrolling and three-finger workspace gestures.
+  </Tab>
+</Tabs>
+
+## Window Rules
+
+Custom opacity rules for specific applications:
+
+```conf
+windowrule = opacity 0.95 0.85, match:class codium
+windowrule = opacity 1 1, match:class brave-browser
+```
+
+<CardGroup cols={2}>
+  <Card title="VSCodium" icon="code">
+    Semi-transparent (95% active, 85% inactive)
+  </Card>
+  <Card title="Brave Browser" icon="browser">
+    Fully opaque (no transparency)
+  </Card>
+</CardGroup>
+
+## Layouts
+
+### Dwindle Layout
+
+```conf
+dwindle {
+    pseudotile = true
+    preserve_split = true
+}
+```
+
+The dwindle layout creates a binary tree structure for window tiling.
+
+### Master Layout
+
+```conf
+master {
+    new_status = master
+}
+```
+
+Alternative layout where new windows become the master window.
+
+## Workspace Rules
+
+<Accordion title="Smart Gaps (Optional)">
+  You can enable "smart gaps" to remove gaps when only one window is present:
+
+  ```conf
+  workspace = w[tv1], gapsout:0, gapsin:0
+  workspace = f[1], gapsout:0, gapsin:0
+  windowrulev2 = bordersize 0, floating:0, onworkspace:w[tv1]
+  windowrulev2 = rounding 0, floating:0, onworkspace:w[tv1]
+  ```
+
+  These rules are commented out by default but can be enabled for a cleaner look with single windows.
+</Accordion>
+
+## Miscellaneous Settings
+
+```conf
+misc {
+    force_default_wallpaper = -1
+    disable_hyprland_logo = true
+}
+```
+
+<Warning>
+The `force_default_wallpaper = -1` setting uses random wallpapers. Set to `0` to disable the anime mascot wallpapers.
+</Warning>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Transparency" icon="eye">
+    Window transparency with blur effects for a modern aesthetic
+  </Card>
+  <Card title="Rounded Corners" icon="circle">
+    20px rounded corners on all windows
+  </Card>
+  <Card title="Smart Shadows" icon="moon">
+    Subtle shadows with optimized rendering
+  </Card>
+  <Card title="Gesture Support" icon="hand">
+    Three-finger horizontal swipe for workspace switching
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Keybindings" icon="keyboard" href="/components/window-manager">
+    Learn about all keyboard shortcuts
+  </Card>
+  <Card title="Waybar" icon="bars" href="/config/waybar">
+    Configure the status bar
+  </Card>
+</CardGroup>

@@ -1,0 +1,541 @@
+---
+title: Custom Theme Creation
+description: Create and integrate your own custom themes across all applications
+icon: paintbrush
+---
+
+Create your own custom themes by defining color palettes for each application in the dotfiles. This guide walks you through the entire process.
+
+## Before You Start
+
+<Note>
+All themes should define a consistent color palette across different file formats:
+- **Hyprland**: Shell variables with `$` prefix
+- **CSS-based apps**: `@define-color` variables
+- **Ghostty**: INI-style `palette` and direct color assignments
+- **Btop**: Associative array with `theme[key]=value`
+- **Neovim**: Lua colorscheme plugin name
+</Note>
+
+## Quick Start: Duplicate an Existing Theme
+
+The easiest way to create a custom theme is to start with an existing one:
+
+```bash
+# Set your theme name
+THEME_NAME="mytheme"
+
+# Copy Kanagawa as a base
+cp ~/.config/hypr/colors/custom/kanagawa.conf ~/.config/hypr/colors/custom/$THEME_NAME.conf
+cp ~/.config/waybar/colors/custom/kanagawa.css ~/.config/waybar/colors/custom/$THEME_NAME.css
+cp ~/.config/wofi/colors/custom/kanagawa.css ~/.config/wofi/colors/custom/$THEME_NAME.css
+cp ~/.config/ghostty/colors/custom/kanagawa ~/.config/ghostty/colors/custom/$THEME_NAME
+cp ~/.config/swaync/colors/custom/kanagawa.css ~/.config/swaync/colors/custom/$THEME_NAME.css
+cp ~/.config/wlogout/colors/custom/kanagawa.css ~/.config/wlogout/colors/custom/$THEME_NAME.css
+cp ~/.config/btop/themes/custom/kanagawa.theme ~/.config/btop/themes/custom/$THEME_NAME.theme
+cp ~/.config/cava/themes/custom/kanagawa ~/.config/cava/themes/custom/$THEME_NAME
+cp ~/.config/zellij/themes/custom/kanagawa.kdl ~/.config/zellij/themes/custom/$THEME_NAME.kdl
+```
+
+Then edit each file to use your custom colors!
+
+## Step-by-Step: Creating a Theme From Scratch
+
+<Steps>
+  <Step title="Choose your color palette">
+    Define your base colors using hex codes. Most themes need:
+    
+    ```plaintext
+    Backgrounds (5 shades):  bg0, bg1, bg2, bg3, bg4
+    Foreground (text):       fg
+    Primary colors (8):      red, orange, yellow, green, aqua, blue, purple, pink
+    Greys/neutrals (3):      grey0, grey1, grey2
+    ```
+    
+    **Example palette:**
+    ```plaintext
+    bg0:    #1a1b26
+    bg1:    #24283b
+    bg2:    #292e42
+    bg3:    #3b4261
+    bg4:    #545c7e
+    fg:     #c0caf5
+    red:    #f7768e
+    orange: #ff9e64
+    yellow: #e0af68
+    green:  #9ece6a
+    aqua:   #73daca
+    blue:   #7aa2f7
+    purple: #bb9af7
+    pink:   #f7a8d8
+    ```
+  </Step>
+  
+  <Step title="Create Hyprland color file">
+    Create `~/.config/hypr/colors/custom/mytheme.conf`:
+    
+    ```conf
+    ##############################################################
+    ## Tema: My Custom Theme                                    ##
+    ## Descripción: A beautiful custom theme                    ##
+    ##############################################################
+    
+    # Backgrounds
+    $bg0 = 1a1b26  # Darkest
+    $bg1 = 24283b  # Main background
+    $bg2 = 292e42
+    $bg3 = 3b4261
+    $bg4 = 545c7e
+    
+    # Foreground (Text)
+    $fg  = c0caf5
+    
+    # Primary Colors
+    $red    = f7768e
+    $orange = ff9e64
+    $yellow = e0af68
+    $green  = 9ece6a
+    $aqua   = 73daca
+    $blue   = 7aa2f7
+    $purple = bb9af7
+    $pink   = f7a8d8
+    
+    # Greys
+    $grey0 = 565f89
+    $grey1 = 9aa5ce
+    $grey2 = 828bb8
+    ```
+  </Step>
+  
+  <Step title="Create CSS color files">
+    Create CSS versions for Waybar, Wofi, SwayNC, and Wlogout. All use the same format:
+    
+    **`~/.config/waybar/colors/custom/mytheme.css`:**
+    ```css
+    /**************************************************************
+    ** Tema: My Custom Theme                                     **
+    ** Descripción: A beautiful custom theme                     **
+    **************************************************************/
+    
+    /* Backgrounds */
+    @define-color bg0 #1a1b26;
+    @define-color bg1 #24283b;
+    @define-color bg2 #292e42;
+    @define-color bg3 #3b4261;
+    @define-color bg4 #545c7e;
+    
+    /* Foreground (Text) */
+    @define-color fg  #c0caf5;
+    
+    /* Primary Colors */
+    @define-color red    #f7768e;
+    @define-color orange #ff9e64;
+    @define-color yellow #e0af68;
+    @define-color green  #9ece6a;
+    @define-color aqua   #73daca;
+    @define-color blue   #7aa2f7;
+    @define-color purple #bb9af7;
+    @define-color pink   #f7a8d8;
+    
+    /* Greys */
+    @define-color grey0 #565f89;
+    @define-color grey1 #9aa5ce;
+    @define-color grey2 #828bb8;
+    ```
+    
+    Copy this to:
+    - `~/.config/wofi/colors/custom/mytheme.css`
+    - `~/.config/swaync/colors/custom/mytheme.css`
+    - `~/.config/wlogout/colors/custom/mytheme.css`
+  </Step>
+  
+  <Step title="Create Ghostty color file">
+    Create `~/.config/ghostty/colors/custom/mytheme`:
+    
+    ```ini
+    # ANSI color palette (0-15)
+    palette = 0=#1a1b26
+    palette = 1=#f7768e
+    palette = 2=#9ece6a
+    palette = 3=#e0af68
+    palette = 4=#7aa2f7
+    palette = 5=#bb9af7
+    palette = 6=#73daca
+    palette = 7=#c0caf5
+    palette = 8=#565f89
+    palette = 9=#f7768e
+    palette = 10=#9ece6a
+    palette = 11=#e0af68
+    palette = 12=#7aa2f7
+    palette = 13=#bb9af7
+    palette = 14=#73daca
+    palette = 15=#c0caf5
+    
+    # Terminal colors
+    background = #24283b
+    foreground = #c0caf5
+    cursor-color = #c0caf5
+    selection-background = #3b4261
+    selection-foreground = #c0caf5
+    ```
+  </Step>
+  
+  <Step title="Create Btop theme file">
+    Create `~/.config/btop/themes/custom/mytheme.theme`:
+    
+    ```ini
+    # Theme: mytheme
+    # By: Your Name
+    
+    theme[main_bg]="#24283b"
+    theme[main_fg]="#c0caf5"
+    theme[title]="#7aa2f7"
+    theme[hi_fg]="#73daca"
+    theme[selected_bg]="#3b4261"
+    theme[selected_fg]="#c0caf5"
+    theme[inactive_fg]="#545c7e"
+    theme[proc_misc]="#73daca"
+    
+    # Box outline colors
+    theme[cpu_box]="#545c7e"
+    theme[mem_box]="#545c7e"
+    theme[net_box]="#545c7e"
+    theme[proc_box]="#545c7e"
+    theme[div_line]="#545c7e"
+    
+    # Gradient colors (start, mid, end)
+    theme[temp_start]="#9ece6a"
+    theme[temp_mid]="#e0af68"
+    theme[temp_end]="#f7768e"
+    
+    theme[cpu_start]="#9ece6a"
+    theme[cpu_mid]="#e0af68"
+    theme[cpu_end]="#f7768e"
+    
+    theme[free_start]="#9ece6a"
+    theme[free_mid]="#e0af68"
+    theme[free_end]="#f7768e"
+    
+    theme[cached_start]="#9ece6a"
+    theme[cached_mid]="#e0af68"
+    theme[cached_end]="#f7768e"
+    
+    theme[available_start]="#9ece6a"
+    theme[available_mid]="#e0af68"
+    theme[available_end]="#f7768e"
+    
+    theme[used_start]="#9ece6a"
+    theme[used_mid]="#e0af68"
+    theme[used_end]="#f7768e"
+    
+    theme[download_start]="#9ece6a"
+    theme[download_mid]="#e0af68"
+    theme[download_end]="#f7768e"
+    
+    theme[upload_start]="#9ece6a"
+    theme[upload_mid]="#e0af68"
+    theme[upload_end]="#f7768e"
+    ```
+  </Step>
+  
+  <Step title="Create Cava color file">
+    Create `~/.config/cava/themes/custom/mytheme`:
+    
+    ```ini
+    [color]
+    gradient = 1
+    gradient_count = 6
+    
+    # Gradient colors (hex without #)
+    gradient_color_1 = '7aa2f7'
+    gradient_color_2 = '73daca'
+    gradient_color_3 = '9ece6a'
+    gradient_color_4 = 'e0af68'
+    gradient_color_5 = 'ff9e64'
+    gradient_color_6 = 'f7768e'
+    ```
+  </Step>
+  
+  <Step title="Create Zellij theme file (optional)">
+    Create `~/.config/zellij/themes/custom/mytheme.kdl`:
+    
+    ```kdl
+    themes {
+        mytheme {
+            fg "#c0caf5"
+            bg "#24283b"
+            black "#1a1b26"
+            red "#f7768e"
+            green "#9ece6a"
+            yellow "#e0af68"
+            blue "#7aa2f7"
+            magenta "#bb9af7"
+            cyan "#73daca"
+            white "#c0caf5"
+            orange "#ff9e64"
+        }
+    }
+    ```
+  </Step>
+  
+  <Step title="Update theme-selector script">
+    Add your theme to the available themes list:
+    
+    ```bash
+    # Edit ~/.local/bin/theme-selector
+    TEMAS="kanagawa\ngruvbox\ncatppuccin\neverforest\nmytheme"
+    ```
+  </Step>
+  
+  <Step title="Update theme-switcher script">
+    Add a case entry for your theme:
+    
+    ```bash
+    # Edit ~/.local/bin/theme-switcher
+    case $THEME in
+    # ... existing themes ...
+    mytheme)
+      VSCODIUM_THEME="Your VSCodium Theme Name"
+      NVIM_THEME="your-nvim-colorscheme"
+      NOTIFY_ICON="🎨"
+      ;;
+    esac
+    ```
+  </Step>
+  
+  <Step title="Test your theme">
+    Apply your new theme:
+    
+    ```bash
+    theme-switcher mytheme
+    ```
+    
+    Check that all applications display correctly:
+    - Open Ghostty and check terminal colors
+    - Inspect Waybar colors
+    - Launch Wofi to verify menu colors
+    - Open Btop to see system monitor theme
+    - Test SwayNC notifications
+  </Step>
+</Steps>
+
+## Color Variable Reference
+
+<Tabs>
+  <Tab title="Standard Variables">
+    These variables are used consistently across all theme files:
+    
+    | Variable | Purpose | Usage |
+    |----------|---------|-------|
+    | `bg0` | Darkest background | Deep shadows, window backgrounds |
+    | `bg1` | Main background | Primary surface color |
+    | `bg2` | Elevated background | Cards, panels |
+    | `bg3` | Higher elevation | Popups, dialogs |
+    | `bg4` | Highest elevation | Tooltips, overlays |
+    | `fg` | Main text | Primary text color |
+    | `red` | Error/danger | Error messages, warnings |
+    | `orange` | Warning | Alerts, caution |
+    | `yellow` | Attention | Highlights, emphasis |
+    | `green` | Success | Confirmations, positive states |
+    | `aqua` | Info/accent | Links, info messages |
+    | `blue` | Primary accent | Borders, focus indicators |
+    | `purple` | Secondary accent | Keywords, special elements |
+    | `pink` | Tertiary accent | Decorative elements |
+    | `grey0` | Subtle text | Comments, disabled text |
+    | `grey1` | Borders | Dividers, borders |
+    | `grey2` | Inactive | Inactive elements |
+  </Tab>
+  
+  <Tab title="Application-Specific">
+    Some applications may need additional colors:
+    
+    **Waybar:**
+    - Uses standard variables
+    - May define `@define-color accent` for workspace indicators
+    
+    **Hyprland:**
+    - Uses `$blue` for active window borders
+    - Uses `$bg3` for inactive window borders
+    
+    **Ghostty:**
+    - Palette entries 0-7: Normal colors
+    - Palette entries 8-15: Bright/bold colors
+    - Usually bright colors are same as normal but higher intensity
+    
+    **Btop:**
+    - Gradient definitions need start, mid, and end colors
+    - Typically green → yellow → red for heat maps
+  </Tab>
+</Tabs>
+
+## Advanced: Port Existing Themes
+
+If you have colors from another theme (e.g., VS Code, terminal theme), convert them:
+
+<CodeGroup>
+```python Python conversion script
+#!/usr/bin/env python3
+import json
+import sys
+
+def hex_to_hypr(color):
+    """Convert #RRGGBB to RRGGBB (remove #)"""
+    return color.lstrip('#')
+
+def hex_to_css(color):
+    """Ensure color has # prefix"""
+    return color if color.startswith('#') else f'#{color}'
+
+# Read VS Code theme JSON
+with open(sys.argv[1]) as f:
+    vscode_theme = json.load(f)
+
+colors = vscode_theme['colors']
+
+# Map VS Code colors to our palette
+palette = {
+    'bg0': colors.get('editor.background'),
+    'bg1': colors.get('editor.background'),
+    'bg2': colors.get('editorGroupHeader.tabsBackground'),
+    'fg': colors.get('editor.foreground'),
+    'red': colors.get('terminal.ansiRed'),
+    'green': colors.get('terminal.ansiGreen'),
+    'blue': colors.get('terminal.ansiBlue'),
+    # ... etc
+}
+
+print("# Hyprland format:")
+for name, color in palette.items():
+    print(f"${name} = {hex_to_hypr(color)}")
+
+print("\n# CSS format:")
+for name, color in palette.items():
+    print(f"@define-color {name} {hex_to_css(color)};")
+```
+
+```bash Manual conversion
+# If you have terminal colors from another source:
+# 1. Note down all 16 ANSI colors + background/foreground
+# 2. Map them to hex codes
+# 3. Use the templates above to create your theme files
+
+# Example: Converting from another dotfiles repo
+# Their theme file:
+color0="#1a1b26"
+color1="#f7768e"
+# ...
+
+# Your Hyprland format:
+$bg0 = 1a1b26
+$red = f7768e
+```
+</CodeGroup>
+
+## Theme Testing Checklist
+
+<Accordion title="Visual Testing Checklist">
+  After applying your theme, verify each component:
+  
+  - [ ] **Hyprland**: Window borders show correct colors
+  - [ ] **Waybar**: All modules display with theme colors
+  - [ ] **Wofi**: Application launcher has themed background/text
+  - [ ] **Ghostty**: Terminal colors match palette (check with `colortest`)
+  - [ ] **SwayNC**: Notifications use theme colors
+  - [ ] **Wlogout**: Logout menu is themed
+  - [ ] **Btop**: System monitor colors are readable
+  - [ ] **Cava**: Audio visualizer gradient looks good
+  - [ ] **Neovim**: Opens with correct colorscheme
+  - [ ] **Wallpaper**: Complements the color scheme
+</Accordion>
+
+<Accordion title="Accessibility Testing">
+  Ensure your theme is readable:
+  
+  ```bash
+  # Test contrast ratios (requires contrast-ratio tool)
+  contrast-ratio "#c0caf5" "#24283b"  # Should be >= 4.5:1 for normal text
+  
+  # Visual test: Can you read all text comfortably?
+  # - Waybar modules
+  # - Terminal output
+  # - Wofi entries
+  ```
+  
+  **WCAG AAA guidelines:**
+  - Normal text: 7:1 contrast ratio
+  - Large text: 4.5:1 contrast ratio
+  - UI components: 3:1 contrast ratio
+</Accordion>
+
+## Sharing Your Theme
+
+Once you've created a theme, consider sharing it:
+
+1. **Create a gist** with all theme files
+2. **Submit a PR** to the dotfiles repository
+3. **Write installation instructions**:
+
+```markdown
+## Installation
+
+# Download theme files
+wget -P ~/.config/hypr/colors/custom/ <url-to-mytheme.conf>
+wget -P ~/.config/waybar/colors/custom/ <url-to-mytheme.css>
+# ... (all other files)
+
+# Apply theme
+theme-switcher mytheme
+```
+
+## Troubleshooting Custom Themes
+
+<AccordionGroup>
+  <Accordion title="Theme doesn't appear in selector">
+    Check that you added it to `theme-selector`:
+    
+    ```bash
+    grep mytheme ~/.local/bin/theme-selector
+    ```
+  </Accordion>
+  
+  <Accordion title="Colors not applying">
+    Verify all theme files exist:
+    
+    ```bash
+    find ~/.config -name "mytheme*"
+    ```
+    
+    Should show files in all theme directories.
+  </Accordion>
+  
+  <Accordion title="Syntax errors in config files">
+    Check for:
+    - Missing semicolons in CSS files
+    - Typos in color variable names
+    - Invalid hex codes (must be 6 digits)
+    - Missing quotes in Btop/Cava configs
+  </Accordion>
+  
+  <Accordion title="Applications not reloading">
+    Manually reload affected applications:
+    
+    ```bash
+    hyprctl reload
+    killall waybar && waybar &
+    killall -SIGUSR2 ghostty
+    swaync-client -rs
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Theme Overview" icon="palette" href="/themes/overview">
+    Learn more about how the theme system works
+  </Card>
+  
+  <Card title="Switch Themes" icon="arrows-rotate" href="/themes/switching">
+    Master theme switching and keyboard shortcuts
+  </Card>
+</CardGroup>

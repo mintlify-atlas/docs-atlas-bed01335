@@ -1,0 +1,387 @@
+---
+title: Editor
+description: Neovim with LazyVim and VSCodium configuration
+icon: code
+---
+
+## Overview
+
+Kanagawa provides two powerful editor options: **Neovim with LazyVim** for terminal-based editing and **VSCodium** for GUI development. Both integrate seamlessly with the theme system.
+
+## Neovim with LazyVim
+
+### LazyVim Setup
+
+Kanagawa uses [LazyVim](https://lazyvim.org), a Neovim configuration framework that provides a solid foundation with sensible defaults and easy plugin management.
+
+<CardGroup cols={2}>
+  <Card title="Modern UI" icon="wand-magic-sparkles">
+    Beautiful interface with transparency, custom themes, and smooth animations
+  </Card>
+  <Card title="LSP Integration" icon="microchip">
+    Built-in language server support with autocompletion and diagnostics
+  </Card>
+  <Card title="Git Integration" icon="code-branch">
+    Powerful git workflow with fugitive and gitsigns
+  </Card>
+  <Card title="Plugin Ecosystem" icon="plug">
+    Extensive plugin library managed with lazy.nvim
+  </Card>
+</CardGroup>
+
+### Theme System
+
+Neovim dynamically loads themes based on the system theme:
+
+```lua
+-- lua/plugins/themes.lua
+local status_ok, theme_bridge = pcall(require, "theme_bridge")
+local current_theme = status_ok and theme_bridge or "kanagawa-wave"
+
+return {
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      colorscheme = current_theme,
+    },
+  },
+}
+```
+
+### Available Themes
+
+<Tabs>
+  <Tab title="Kanagawa">
+    ```lua
+    {
+      "rebelot/kanagawa.nvim",
+      name = "kanagawa",
+      priority = 1000,
+      config = function()
+        require("kanagawa").setup({
+          transparent = true,
+          terminalColors = true,
+          theme = "wave",
+          overrides = function(colors)
+            return {
+              NormalFloat = { bg = "none" },
+              FloatBorder = { bg = "none" },
+              TelescopeNormal = { bg = "none" },
+            }
+          end,
+        })
+      end,
+    }
+    ```
+  </Tab>
+
+  <Tab title="Catppuccin">
+    ```lua
+    {
+      "catppuccin/nvim",
+      name = "catppuccin",
+      priority = 1000,
+      opts = {
+        flavour = "mocha",
+        transparent_background = true,
+        term_colors = true,
+      },
+    }
+    ```
+  </Tab>
+
+  <Tab title="Gruvbox">
+    ```lua
+    {
+      "ellisonleao/gruvbox.nvim",
+      priority = 1000,
+      config = function()
+        require("gruvbox").setup({
+          transparent_mode = true,
+        })
+      end,
+    }
+    ```
+  </Tab>
+
+  <Tab title="Everforest">
+    ```lua
+    {
+      "neanias/everforest-nvim",
+      name = "everforest",
+      priority = 1000,
+      config = function()
+        require("everforest").setup({
+          -- Your config here
+        })
+      end,
+    }
+    ```
+  </Tab>
+</Tabs>
+
+### Custom Plugins
+
+Kanagawa includes several custom plugins to enhance the editing experience:
+
+#### Smear Cursor
+
+Smooth cursor animations for better visual tracking:
+
+```lua
+return {
+  "sphamba/smear-cursor.nvim",
+  opts = {
+    stiffness = 0.8,
+    trailing_stiffness = 0.6,
+    stiffness_insert_mode = 0.7,
+    trailing_stiffness_insert_mode = 0.7,
+    damping = 0.95,
+    damping_insert_mode = 0.95,
+    distance_stop_animating = 0.5,
+  },
+}
+```
+
+<Info>
+Smear cursor creates a smooth animation trail when moving the cursor, making it easier to track during rapid navigation.
+</Info>
+
+#### Sidekick AI Assistant
+
+AI-powered coding assistant with Zellij/tmux integration:
+
+```lua
+return {
+  "folke/sidekick.nvim",
+  opts = {
+    cli = {
+      mux = {
+        backend = "zellij",
+        enabled = true,
+      },
+    },
+  },
+  keys = {
+    {
+      "<leader>aa",
+      function()
+        require("sidekick.cli").toggle()
+      end,
+      desc = "Sidekick Toggle CLI",
+    },
+    {
+      "<leader>ap",
+      function()
+        require("sidekick.cli").prompt()
+      end,
+      desc = "Sidekick Prompt Picker",
+    },
+  },
+}
+```
+
+**Keybindings:**
+- `<leader>aa` - Toggle Sidekick CLI
+- `<leader>as` - Select CLI
+- `<leader>ap` - Sidekick prompt picker
+- `<Tab>` - Go to/apply next edit suggestion
+
+#### Markdown Rendering
+
+Beautiful markdown preview with syntax highlighting:
+
+```lua
+return {
+  "MeanderingProgrammer/render-markdown.nvim",
+  dependencies = {
+    "nvim-treesitter/nvim-treesitter",
+    "nvim-mini/mini.nvim"
+  },
+  opts = {},
+}
+```
+
+#### Live Preview
+
+Real-time HTML/markdown preview in browser:
+
+```lua
+return {
+  "brianhuster/live-preview.nvim",
+  dependencies = {
+    "nvim-telescope/telescope.nvim",
+    "ibhagwan/fzf-lua",
+    "nvim-mini/mini.pick",
+    "folke/snacks.nvim",
+  },
+}
+```
+
+### Copilot Integration
+
+GitHub Copilot support with LSP integration:
+
+```lua
+{
+  "neovim/nvim-lspconfig",
+  opts = function(_, opts)
+    opts.servers = opts.servers or {}
+    opts.servers.copilot = {
+      cmd = { "copilot-language-server", "--stdio" },
+      filetypes = { "*" },
+    }
+  end,
+}
+```
+
+<Note>
+Copilot is disabled by default for sensitive filetypes like YAML, gitcommit, and markdown.
+</Note>
+
+### Transparency Settings
+
+All themes are configured with transparency to blend with the Ghostty terminal background:
+
+```lua
+config = function()
+  require("kanagawa").setup({
+    transparent = true,
+    overrides = function(colors)
+      return {
+        LineNr = { bg = "none" },
+        NormalFloat = { bg = "none" },
+        FloatBorder = { bg = "none" },
+        TelescopeNormal = { bg = "none" },
+        TelescopeBorder = { bg = "none" },
+      }
+    end,
+  })
+end
+```
+
+## VSCodium
+
+### Overview
+
+VSCodium is a community-driven, freely-licensed binary distribution of Microsoft's VS Code, without Microsoft branding, telemetry, and licensing.
+
+### Launch VSCodium
+
+Press `SUPER + C` to launch VSCodium:
+
+```conf
+# keybindings.conf
+bind = $mainMod, C, exec, vscodium
+```
+
+### Theme Synchronization
+
+VSCodium themes are synchronized with the system theme using the same theme selector:
+
+- **Kanagawa** - Custom VSCode extension
+- **Catppuccin** - Official Catppuccin theme
+- **Gruvbox** - Gruvbox Material theme
+- **Everforest** - Everforest theme
+
+<Tip>
+Install the corresponding VSCodium extensions for each theme to ensure proper synchronization.
+</Tip>
+
+### Recommended Extensions
+
+<CardGroup cols={2}>
+  <Card title="Language Support" icon="language">
+    - Rust Analyzer
+    - Python
+    - C/C++
+    - TypeScript/JavaScript
+  </Card>
+  <Card title="Git Integration" icon="code-branch">
+    - GitLens
+    - Git Graph
+    - GitHub Pull Requests
+  </Card>
+  <Card title="Themes" icon="palette">
+    - Kanagawa Theme
+    - Catppuccin
+    - Gruvbox Material
+    - Everforest
+  </Card>
+  <Card title="Productivity" icon="bolt">
+    - GitHub Copilot
+    - Error Lens
+    - Path Intellisense
+    - Auto Rename Tag
+  </Card>
+</CardGroup>
+
+## Launching Editors
+
+### Neovim
+
+```bash
+# Launch Neovim
+nvim
+
+# Edit specific file
+nvim ~/notes.md
+
+# Open with specific command
+nvim +"Telescope find_files"
+```
+
+### VSCodium
+
+```bash
+# Launch VSCodium
+vscodium
+
+# Open specific file
+vscodium ~/project/
+
+# Open with specific folder
+vscodium .
+```
+
+## Configuration Locations
+
+<CodeGroup>
+```bash Neovim
+~/.config/nvim/
+├── init.lua
+├── lua/
+│   ├── config/
+│   └── plugins/
+│       ├── themes.lua
+│       ├── smear.lua
+│       ├── sidekick.lua
+│       ├── render-markdown.lua
+│       └── live-preview.lua
+```
+
+```bash VSCodium
+~/.config/VSCodium/
+├── User/
+│   ├── settings.json
+│   ├── keybindings.json
+│   └── snippets/
+```
+</CodeGroup>
+
+## Learn More
+
+<CardGroup cols={2}>
+  <Card title="LazyVim Documentation" icon="book" href="https://lazyvim.org">
+    Official LazyVim documentation and plugin reference
+  </Card>
+  <Card title="Neovim Documentation" icon="book-open" href="https://neovim.io/doc">
+    Neovim user manual and reference
+  </Card>
+  <Card title="VSCodium" icon="code" href="https://vscodium.com">
+    VSCodium documentation and downloads
+  </Card>
+  <Card title="Theme System" icon="palette" href="/themes/overview">
+    Learn about theme synchronization
+  </Card>
+</CardGroup>

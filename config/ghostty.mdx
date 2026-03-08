@@ -1,0 +1,346 @@
+---
+title: 'Ghostty Terminal'
+description: 'Ghostty terminal emulator configuration and theming'
+icon: 'terminal'
+---
+
+## Overview
+
+Ghostty is a fast, modern terminal emulator used in the Kanagawa dotfiles. It features GPU acceleration, transparency, blur effects, and seamless theme integration.
+
+<Note>
+Ghostty is the default terminal in the Hyprland setup and is launched with `Super + T`.
+</Note>
+
+## Configuration Location
+
+```bash
+~/.config/ghostty/
+├── config                  # Main configuration
+└── colors/                 # Theme color files
+    └── colors              # Active theme colors
+```
+
+## Main Configuration
+
+The Ghostty configuration file (`~/.config/ghostty/config`) defines appearance, fonts, and behavior:
+
+```conf
+config-file = "colors/colors"
+
+cursor-opacity = 1
+
+background-opacity = 0.95
+background-blur = true
+window-padding-x = 2
+
+font-family = CaskaydiaCove NFM
+font-style = Regular
+font-size = 13
+
+keybind = shift+enter=text:\n
+keybind = ctrl+r=reload_config
+
+confirm-close-surface = false
+```
+
+<Tabs>
+  <Tab title="Appearance">
+    ## Visual Settings
+
+    ### Transparency and Blur
+
+    ```conf
+    background-opacity = 0.95
+    background-blur = true
+    ```
+
+    Ghostty uses 95% opacity with background blur for a modern, aesthetic look that integrates with the Hyprland compositor.
+
+    ### Cursor Configuration
+
+    ```conf
+    cursor-opacity = 1
+    ```
+
+    Fully opaque cursor for better visibility.
+
+    ### Window Padding
+
+    ```conf
+    window-padding-x = 2
+    ```
+
+    Minimal horizontal padding (2 pixels) for a clean look.
+
+    <CardGroup cols={2}>
+      <Card title="Background Blur" icon="droplet">
+        Blurred background for depth perception
+      </Card>
+      <Card title="Transparency" icon="eye">
+        95% opacity blends with desktop
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="Font">
+    ## Font Configuration
+
+    ```conf
+    font-family = CaskaydiaCove NFM
+    font-style = Regular
+    font-size = 13
+    ```
+
+    ### Font Details
+
+    - **Family**: CaskaydiaCove Nerd Font Mono (NFM)
+    - **Style**: Regular weight
+    - **Size**: 13pt
+
+    <Note>
+    CaskaydiaCove is a patched version of Cascadia Code with Nerd Font icons, providing excellent readability and icon support.
+    </Note>
+
+    ### Why This Font?
+
+    <CardGroup cols={2}>
+      <Card title="Ligatures" icon="link">
+        Programming ligatures for better code readability
+      </Card>
+      <Card title="Nerd Font Icons" icon="icons">
+        Built-in icons for terminal applications
+      </Card>
+      <Card title="Monospace" icon="grip-lines">
+        Perfect character alignment
+      </Card>
+      <Card title="Clear Glyphs" icon="eye">
+        Excellent distinction between similar characters
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="Keybindings">
+    ## Custom Keybindings
+
+    ### Shift + Enter: Newline
+
+    ```conf
+    keybind = shift+enter=text:\n
+    ```
+
+    Insert a literal newline character, useful for multi-line commands or text input.
+
+    ### Ctrl + R: Reload Config
+
+    ```conf
+    keybind = ctrl+r=reload_config
+    ```
+
+    Instantly reload Ghostty configuration without restarting the terminal.
+
+    <CardGroup cols={2}>
+      <Card title="Quick Reload" icon="rotate">
+        Test configuration changes instantly with Ctrl+R
+      </Card>
+      <Card title="Multi-line Input" icon="align-left">
+        Use Shift+Enter for multi-line commands
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="Behavior">
+    ## Terminal Behavior
+
+    ### Close Confirmation
+
+    ```conf
+    confirm-close-surface = false
+    ```
+
+    Disables the "Are you sure?" prompt when closing the terminal. The terminal closes immediately.
+
+    <Warning>
+    With `confirm-close-surface = false`, running processes will be terminated without warning. Use with caution.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Theme Integration
+
+Ghostty integrates with the Kanagawa theme system:
+
+```conf
+config-file = "colors/colors"
+```
+
+### How Theme Switching Works
+
+<Steps>
+  <Step title="Theme Selection">
+    User runs the theme selector script (`Super + Shift + Enter`)
+  </Step>
+  <Step title="Color Generation">
+    Script generates Ghostty-compatible color file in `~/.config/ghostty/colors/colors`
+  </Step>
+  <Step title="Reload">
+    Ghostty automatically reloads configuration with new colors
+  </Step>
+</Steps>
+
+### Color File Format
+
+The `colors/colors` file contains terminal color definitions:
+
+```conf
+# Example color configuration
+foreground = #d3c6aa
+background = #2d353b
+
+# Normal colors
+palette = 0=#475258
+palette = 1=#e67e80
+palette = 2=#a7c080
+palette = 3=#dbbc7f
+palette = 4=#7fbbb3
+palette = 5=#d699b6
+palette = 6=#83c092
+palette = 7=#d3c6aa
+
+# Bright colors
+palette = 8=#859289
+palette = 9=#e67e80
+palette = 10=#a7c080
+palette = 11=#dbbc7f
+palette = 12=#7fbbb3
+palette = 13=#d699b6
+palette = 14=#83c092
+palette = 15=#d3c6aa
+```
+
+<Note>
+These colors are automatically generated based on your selected theme and should not be manually edited.
+</Note>
+
+## Launching Ghostty
+
+### From Hyprland
+
+```conf
+# In keybindings.conf
+$terminal = env GTK_IM_MODULE=simple ghostty
+bind = $mainMod, T, exec, $terminal
+```
+
+**Keybinding**: `Super + T`
+
+### Environment Variables
+
+Ghostty is launched with `GTK_IM_MODULE=simple` to ensure proper input method handling.
+
+## Performance Features
+
+<CardGroup cols={2}>
+  <Card title="GPU Acceleration" icon="microchip">
+    Hardware-accelerated rendering for smooth performance
+  </Card>
+  <Card title="Fast Startup" icon="bolt">
+    Near-instant launch times
+  </Card>
+  <Card title="Low Latency" icon="gauge-high">
+    Minimal input lag for responsive typing
+  </Card>
+  <Card title="Efficient Blur" icon="sparkles">
+    Optimized background blur effects
+  </Card>
+</CardGroup>
+
+## Configuration Tips
+
+<Accordion title="Adjusting Font Size">
+  Change the `font-size` value in the config:
+
+  ```conf
+  font-size = 14  # Larger
+  font-size = 12  # Smaller
+  ```
+
+  Press `Ctrl+R` after saving to reload the configuration.
+</Accordion>
+
+<Accordion title="Changing Opacity">
+  Adjust `background-opacity` for different transparency levels:
+
+  ```conf
+  background-opacity = 1.0   # Fully opaque
+  background-opacity = 0.90  # More transparent
+  background-opacity = 0.80  # Very transparent
+  ```
+
+  Values range from 0.0 (fully transparent) to 1.0 (fully opaque).
+</Accordion>
+
+<Accordion title="Using Different Fonts">
+  Replace `font-family` with any installed Nerd Font:
+
+  ```conf
+  font-family = JetBrainsMono NFM
+  font-family = FiraCode NFM
+  font-family = Hack NFM
+  ```
+
+  Ensure the font is installed on your system.
+</Accordion>
+
+<Accordion title="Disabling Blur">
+  Set `background-blur` to false for better performance on older hardware:
+
+  ```conf
+  background-blur = false
+  ```
+</Accordion>
+
+## Comparison with Other Terminals
+
+| Feature | Ghostty | Kitty | Alacritty | Wezterm |
+|---------|---------|-------|-----------|----------|
+| GPU Acceleration | ✓ | ✓ | ✓ | ✓ |
+| Background Blur | ✓ | ✗ | ✗ | ✗ |
+| Config Reload | ✓ | ✓ | ✗ | ✓ |
+| Ligatures | ✓ | ✓ | ✗ | ✓ |
+| True Color | ✓ | ✓ | ✓ | ✓ |
+
+<Note>
+Ghostty's native background blur support sets it apart from other terminal emulators.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Blur not working">
+    Ensure your compositor (Hyprland) supports blur effects and that `background-blur = true` is set in the config.
+  </Accordion>
+
+  <Accordion title="Font not displaying icons">
+    Make sure you're using a Nerd Font variant (NFM). Install from [nerdfonts.com](https://www.nerdfonts.com/).
+  </Accordion>
+
+  <Accordion title="Colors not updating">
+    Press `Ctrl+R` to reload the configuration, or restart Ghostty completely.
+  </Accordion>
+
+  <Accordion title="Input method issues">
+    The `GTK_IM_MODULE=simple` environment variable should resolve most input method problems. If issues persist, try different input method configurations.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Shell Configuration" icon="terminal" href="/config/shell">
+    Configure Zsh and Oh My Zsh
+  </Card>
+  <Card title="Theme Switching" icon="palette" href="/scripts/theme-selector">
+    Learn how to switch themes
+  </Card>
+</CardGroup>

@@ -1,0 +1,342 @@
+---
+title: Installation
+description: Complete guide to installing Kanagawa dotfiles on your Arch Linux system
+---
+
+# Installation Guide
+
+This guide will walk you through the complete installation process for Kanagawa dotfiles on your Arch Linux system.
+
+<Warning>
+  **Backup Your Configurations!** Before proceeding, make sure to backup your existing dotfiles and configurations. This installation will create symlinks that may override existing files.
+</Warning>
+
+## Prerequisites
+
+<Steps>
+  <Step title="Arch Linux Installation">
+    You must be running Arch Linux (or an Arch-based distribution). This configuration is specifically designed for Arch.
+    
+    Verify your system:
+    ```bash
+    cat /etc/os-release | grep "Arch Linux"
+    ```
+  </Step>
+
+  <Step title="Required Packages">
+    Install the essential packages needed for this configuration:
+
+    <CodeGroup>
+      ```bash Core System
+      sudo pacman -S hyprland waybar wofi ghostty \
+                     swaync wlogout hyprpaper \
+                     polkit-gnome xdg-desktop-portal-hyprland
+      ```
+
+      ```bash Development Tools
+      sudo pacman -S neovim git stow base-devel
+      ```
+
+      ```bash Shell & CLI Tools
+      sudo pacman -S zsh bat eza zoxide fzf \
+                     atuin btop cava fastfetch
+      ```
+
+      ```bash Optional Applications
+      # VSCodium requires AUR
+      yay -S vscodium-bin brave-bin
+      ```
+    </CodeGroup>
+
+    <Note>
+      **GNU Stow** is essential for this installation. It manages symlinks from the dotfiles repository to your system configuration directories.
+    </Note>
+  </Step>
+
+  <Step title="Shell Setup">
+    If you haven't already, change your shell to Zsh:
+    
+    ```bash
+    chsh -s $(which zsh)
+    ```
+    
+    Install Oh My Zsh and Powerlevel10k:
+    
+    ```bash
+    # Install Oh My Zsh
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    
+    # Install Powerlevel10k theme
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
+      ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+    ```
+  </Step>
+</Steps>
+
+## Installation Process
+
+<Steps>
+  <Step title="Clone the Repository">
+    Clone the Kanagawa dotfiles repository to your home directory:
+    
+    ```bash
+    git clone https://github.com/nixer112/dotfiles.git ~/dotfiles
+    cd ~/dotfiles
+    ```
+    
+    <Note>
+      The repository should be cloned to `~/dotfiles` as the scripts expect this location.
+    </Note>
+  </Step>
+
+  <Step title="Review the Installation Script">
+    Before running the installer, let's understand what it does. Here's the complete `install.sh` script:
+    
+    ```bash
+    #!/bin/bash
+
+    # Colores para la terminal
+    GREEN='\033[0;32m'
+    NC='\033[0m'
+
+    echo -e "${GREEN}Iniciando instalación de dotfiles... ${NC}"
+
+    # Crear carpeta .config si no existe
+    mkdir -p ~/.config
+    mkdir -p ~/.local/bin
+    
+    # stow -v (verbose) -R (recursive) -t (target)
+    # Linkeamos lo que hay dentro de la carpeta 'config' a ~/.config
+    stow -v -R -t ~/.config config
+    stow -v -R -t ~/.local/bin scripts
+
+    # Linkeamos lo que hay en 'shell' al HOME
+    stow -v -R -t ~ shell
+
+    echo -e "${GREEN}¡Todo listo! Enlaces creados.${NC}"
+    ```
+    
+    **What it does:**
+    - Creates `~/.config` and `~/.local/bin` directories if they don't exist
+    - Uses `stow -R` (restow) to create/update symlinks
+    - Links `config/` directory contents to `~/.config/`
+    - Links `scripts/` directory contents to `~/.local/bin/`
+    - Links `shell/` directory contents to your home directory (`~`)
+    
+    <Tip>
+      The `-R` flag means "restow", which first unstows and then stows again. This is safe to run multiple times.
+    </Tip>
+  </Step>
+
+  <Step title="Run the Installation Script">
+    Make the script executable and run it:
+    
+    ```bash
+    chmod +x install.sh
+    ./install.sh
+    ```
+    
+    You should see output like:
+    ```
+    Iniciando instalación de dotfiles...
+    LINK: .zshrc => dotfiles/shell/.zshrc
+    LINK: .config/hypr => dotfiles/config/hypr
+    LINK: .config/waybar => dotfiles/config/waybar
+    ...
+    ¡Todo listo! Enlaces creados.
+    ```
+  </Step>
+
+  <Step title="Make Scripts Executable">
+    Ensure all scripts in `~/.local/bin` are executable:
+    
+    ```bash
+    chmod +x ~/.local/bin/*
+    ```
+    
+    Verify the theme scripts are accessible:
+    ```bash
+    which theme-selector
+    which theme-switcher
+    ```
+  </Step>
+</Steps>
+
+## Post-Installation Steps
+
+<Steps>
+  <Step title="Reload Your Shell">
+    Start a new shell session or reload your configuration:
+    
+    ```bash
+    exec zsh
+    ```
+    
+    Powerlevel10k will prompt you to configure it on first launch. Follow the interactive setup wizard.
+  </Step>
+
+  <Step title="Start Hyprland">
+    If you're not already in Hyprland, start it:
+    
+    ```bash
+    Hyprland
+    ```
+    
+    Or reboot and select Hyprland from your display manager.
+  </Step>
+
+  <Step title="Test the Theme Selector">
+    Once in Hyprland, test the theme switcher:
+    
+    ```bash
+    theme-selector
+    ```
+    
+    This will launch a Wofi menu where you can choose from:
+    - Kanagawa (default)
+    - Gruvbox
+    - Catppuccin
+    - Everforest
+    
+    <Note>
+      The theme selector will automatically update all configured applications including Hyprland, Waybar, Wofi, Ghostty, Neovim, VSCodium, SwayNC, and more.
+    </Note>
+  </Step>
+
+  <Step title="Verify All Components">
+    Check that all components are working:
+    
+    <Accordion title="Waybar (Status Bar)">
+      Should appear at the top of your screen. If not:
+      ```bash
+      waybar &
+      ```
+    </Accordion>
+    
+    <Accordion title="Wofi (Launcher)">
+      Press `Super + D` (or your configured keybind) to open the application launcher.
+    </Accordion>
+    
+    <Accordion title="Ghostty (Terminal)">
+      Press `Super + Return` to open a terminal. Check that the Kanagawa theme is applied.
+    </Accordion>
+    
+    <Accordion title="Notifications (SwayNC)">
+      Test notifications:
+      ```bash
+      notify-send "Test" "Kanagawa dotfiles are working!"
+      ```
+    </Accordion>
+  </Step>
+</Steps>
+
+## Configuration Locations
+
+After installation, your configurations will be symlinked to these locations:
+
+| Component | Symlink Location | Source |
+| :--- | :--- | :--- |
+| Hyprland | `~/.config/hypr/` | `~/dotfiles/config/hypr/` |
+| Waybar | `~/.config/waybar/` | `~/dotfiles/config/waybar/` |
+| Ghostty | `~/.config/ghostty/` | `~/dotfiles/config/ghostty/` |
+| Wofi | `~/.config/wofi/` | `~/dotfiles/config/wofi/` |
+| Neovim | `~/.config/nvim/` | `~/dotfiles/config/nvim/` |
+| SwayNC | `~/.config/swaync/` | `~/dotfiles/config/swaync/` |
+| Wlogout | `~/.config/wlogout/` | `~/dotfiles/config/wlogout/` |
+| Btop | `~/.config/btop/` | `~/dotfiles/config/btop/` |
+| Cava | `~/.config/cava/` | `~/dotfiles/config/cava/` |
+| Scripts | `~/.local/bin/` | `~/dotfiles/scripts/` |
+| Zsh | `~/.zshrc` | `~/dotfiles/shell/.zshrc` |
+
+<Tip>
+  To modify any configuration, edit the files in `~/dotfiles/` and the changes will be reflected immediately through the symlinks.
+</Tip>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Stow conflicts with existing files">
+    If you get errors about existing files:
+    
+    ```bash
+    # Backup your existing configs
+    mkdir -p ~/backup-configs
+    mv ~/.config/hypr ~/backup-configs/
+    mv ~/.config/waybar ~/backup-configs/
+    # ... backup other conflicting directories
+    
+    # Then run install.sh again
+    ./install.sh
+    ```
+  </Accordion>
+
+  <Accordion title="Scripts not found in PATH">
+    Ensure `~/.local/bin` is in your PATH:
+    
+    ```bash
+    echo $PATH | grep ".local/bin"
+    ```
+    
+    If not, add this to your `~/.zshrc`:
+    ```bash
+    export PATH="$HOME/.local/bin:$PATH"
+    ```
+  </Accordion>
+
+  <Accordion title="Waybar not showing">
+    Manually start Waybar:
+    ```bash
+    killall waybar
+    waybar &
+    ```
+    
+    Check Hyprland config for autostart:
+    ```bash
+    grep waybar ~/.config/hypr/hyprland.conf
+    ```
+  </Accordion>
+
+  <Accordion title="Theme switcher not working">
+    Verify all theme files exist:
+    ```bash
+    ls ~/.config/hypr/colors/custom/
+    ls ~/.config/waybar/colors/custom/
+    ls ~/.config/wofi/colors/custom/
+    ```
+    
+    Run theme-switcher directly:
+    ```bash
+    theme-switcher kanagawa
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Uninstallation
+
+If you need to remove the dotfiles:
+
+```bash
+cd ~/dotfiles
+stow -D -t ~/.config config
+stow -D -t ~/.local/bin scripts
+stow -D -t ~ shell
+```
+
+This will remove all symlinks created by the installation.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+    Learn the essential commands and workflows
+  </Card>
+  <Card title="Configuration" icon="gear" href="/config/hyprland">
+    Customize your setup to your preferences
+  </Card>
+  <Card title="Keybindings" icon="keyboard" href="/components/window-manager">
+    Master the keyboard shortcuts
+  </Card>
+  <Card title="Themes" icon="palette" href="/themes/overview">
+    Explore and customize themes
+  </Card>
+</CardGroup>

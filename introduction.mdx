@@ -1,0 +1,140 @@
+---
+title: Introduction
+description: A minimalist, productive Arch Linux + Hyprland setup centered around the Kanagawa color scheme
+---
+
+# Welcome to Kanagawa Dotfiles
+
+A beautiful, minimalist dotfiles collection designed for Arch Linux users who love Hyprland and want a productive, aesthetically pleasing desktop environment centered around the stunning Kanagawa color scheme.
+
+<img src="/screenshots/desktop.png" alt="Desktop Preview" width="100%" />
+
+## What is This?
+
+Kanagawa Dotfiles is a carefully curated configuration system that transforms your Arch Linux installation into a modern, efficient workspace. Built on top of Hyprland (Wayland compositor), this configuration brings together the best tools in the Linux ecosystem with a cohesive visual design inspired by the Kanagawa wave.
+
+**"Configuración minimalista, productiva y centrada en el esquema de colores Kanagawa."**
+
+## Who Is This For?
+
+This dotfiles collection is perfect for:
+
+<CardGroup cols={2}>
+  <Card title="Arch Linux Users" icon="box">
+    Users running Arch Linux who want a polished Wayland experience
+  </Card>
+  <Card title="Hyprland Enthusiasts" icon="window-maximize">
+    Those who prefer tiling window managers with modern features
+  </Card>
+  <Card title="Productivity Seekers" icon="rocket">
+    Developers and power users who value efficiency and aesthetics
+  </Card>
+  <Card title="Theme Lovers" icon="palette">
+    Anyone who appreciates beautiful, cohesive color schemes
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<AccordionGroup>
+  <Accordion title="🎨 Multi-Theme Support" icon="palette">
+    Switch between Kanagawa, Gruvbox, Catppuccin, and Everforest themes instantly using the built-in theme selector. All components update automatically including:
+    - Hyprland borders and decorations
+    - Waybar status bar
+    - Wofi launcher
+    - Ghostty terminal
+    - Neovim editor
+    - VSCodium IDE
+    - SwayNC notifications
+    - Wlogout power menu
+    - Btop system monitor
+    - Cava audio visualizer
+  </Accordion>
+
+  <Accordion title="⚡ Modern Wayland Stack" icon="bolt">
+    Built entirely on Wayland for tear-free graphics, better performance, and modern display features. Uses Hyprland as the compositor for smooth animations and powerful tiling.
+  </Accordion>
+
+  <Accordion title="🛠️ Developer-Focused Tools" icon="code">
+    Includes modern CLI replacements and productivity tools:
+    - `bat` for syntax-highlighted file viewing
+    - `eza` for better directory listings
+    - `zoxide` for smart directory jumping
+    - `fzf` for fuzzy finding
+    - `atuin` for shell history
+  </Accordion>
+
+  <Accordion title="📦 GNU Stow Management" icon="box">
+    All configurations are managed with GNU Stow for clean, symlink-based deployment. Easy to install, update, and remove without cluttering your home directory.
+  </Accordion>
+
+  <Accordion title="🚀 One-Command Installation" icon="terminal">
+    Simple installation script handles everything automatically. No manual file copying or complex setup required.
+  </Accordion>
+</AccordionGroup>
+
+## Tech Stack
+
+Here's what powers this configuration:
+
+| Component | Tool | Description |
+| :--- | :--- | :--- |
+| **OS** | [Arch Linux](https://archlinux.org/) | Rolling release Linux distribution |
+| **WM** | [Hyprland](https://hyprland.org/) | Dynamic tiling Wayland compositor |
+| **Terminal** | [Ghostty](https://ghostty.org/) | Fast, feature-rich terminal emulator |
+| **Status Bar** | [Waybar](https://github.com/Alexays/Waybar) | Highly customizable bar for Wayland |
+| **Launcher** | [Wofi](https://hg.sr.ht/~scoopta/wofi) | Application launcher for Wayland |
+| **Editor** | [Neovim](https://github.com/neovim/neovim) | Hyperextensible Vim-based editor (Lua config) |
+| **IDE** | [VSCodium](https://vscodium.com/) | FLOSS version of VS Code |
+| **Shell** | Zsh | With Oh My Zsh + Powerlevel10k |
+| **Notifications** | SwayNC | Notification daemon for Wayland |
+| **Utilities** | Bat, Eza, Zoxide, Fzf, Atuin | Modern CLI tools |
+
+## Repository Structure
+
+The repository is organized for easy management with GNU Stow:
+
+```bash
+~/dotfiles/
+├── config/          # Application configurations → ~/.config/
+│   ├── hypr/       # Hyprland compositor settings
+│   ├── waybar/     # Status bar configuration
+│   ├── ghostty/    # Terminal settings
+│   ├── wofi/       # Launcher configuration
+│   ├── nvim/       # Neovim configuration
+│   └── ...         # Other apps
+├── scripts/         # Custom automation scripts → ~/.local/bin/
+│   ├── theme-selector
+│   ├── theme-switcher
+│   └── weather
+├── shell/           # Zsh configuration → ~/
+│   └── .zshrc
+├── screenshots/     # Preview images
+└── install.sh       # Installation script
+```
+
+<Note>
+  Each directory maps to a specific location in your system. The `config/` directory contents are symlinked to `~/.config/`, scripts go to `~/.local/bin/`, and shell configs to your home directory.
+</Note>
+
+## Gallery
+
+<img src="/screenshots/codium_brave.png" alt="VSCodium and Brave" width="49%" style="display: inline-block;" />
+<img src="/screenshots/terminal_stuff.png" alt="Terminal Applications" width="49%" style="display: inline-block;" />
+
+## Next Steps
+
+Ready to get started?
+
+<CardGroup cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Get up and running in 5 minutes
+  </Card>
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Detailed installation instructions
+  </Card>
+</CardGroup>
+
+<Warning>
+  **Important:** These dotfiles are designed specifically for Arch Linux with Hyprland. Make sure you have Arch Linux installed before proceeding.
+</Warning>

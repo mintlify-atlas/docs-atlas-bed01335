@@ -1,0 +1,714 @@
+---
+title: 'Creating Custom Scripts'
+description: 'Guide to writing and integrating custom scripts'
+icon: 'code'
+---
+
+## Overview
+
+Kanagawa dotfiles make it easy to add custom scripts to your system. By placing scripts in `~/.local/bin`, they become available system-wide and can integrate with Hyprland keybindings, Waybar, and the theme system.
+
+<Info>
+  All scripts in `~/.local/bin` are automatically in your PATH and can be executed from anywhere.
+</Info>
+
+## Script Installation
+
+The installation process uses GNU Stow to symlink scripts from the dotfiles repository to your system:
+
+```bash
+# From install.sh
+mkdir -p ~/.local/bin
+stow -v -R -t ~/.local/bin scripts
+```
+
+**What this does:**
+- Creates `~/.local/bin` if it doesn't exist
+- Symlinks all files from `scripts/` directory to `~/.local/bin`
+- Makes scripts available system-wide
+
+## Basic Script Template
+
+### Simple Bash Script
+
+```bash
+#!/bin/bash
+
+# Script description and purpose
+# Author: Your Name
+# Date: 2026-03-08
+
+# Enable error handling
+set -e
+
+# Define variables
+CONFIG_DIR="$HOME/.config/myapp"
+OUTPUT_FILE="$CONFIG_DIR/output.txt"
+
+# Main logic
+main() {
+  # Your code here
+  echo "Script executed successfully"
+}
+
+# Run main function
+main "$@"
+```
+
+### Shell Script (POSIX Compatible)
+
+```sh
+#!/bin/sh
+
+# Faster startup for simple scripts
+# More portable across systems
+
+# Define variables
+CONFIG="$HOME/.config/myapp/config"
+
+# Main logic
+if [ -f "$CONFIG" ]; then
+  echo "Config found"
+else
+  echo "Config missing"
+fi
+```
+
+## Integrating with the Theme System
+
+### Reading Current Theme
+
+Scripts can read the current theme from configuration files:
+
+```bash
+#!/bin/bash
+
+# Extract current theme from Hyprland config
+get_current_theme() {
+  local colors_conf="$HOME/.config/hypr/colors/colors.conf"
+  
+  if [ -f "$colors_conf" ]; then
+    # Parse: source = ~/.config/hypr/colors/custom/kanagawa.conf
+    grep "source" "$colors_conf" | sed 's/.*custom\/\(.*\)\.conf/\1/'
+  else
+    echo "unknown"
+  fi
+}
+
+CURRENT_THEME=$(get_current_theme)
+echo "Current theme: $CURRENT_THEME"
+```
+
+### Theme-Aware Script Example
+
+```bash
+#!/bin/bash
+
+# Script that adapts behavior based on current theme
+
+get_theme_icon() {
+  local theme=$1
+  
+  case "$theme" in
+    kanagawa) echo "🌊" ;;
+    gruvbox) echo "📦" ;;
+    catppuccin) echo "☕" ;;
+    everforest) echo "🌲" ;;
+    *) echo "🎨" ;;
+  esac
+}
+
+# Read current theme
+CURRENT_THEME=$(grep "source" "$HOME/.config/hypr/colors/colors.conf" | sed 's/.*custom\/\(.*\)\.conf/\1/')
+ICON=$(get_theme_icon "$CURRENT_THEME")
+
+# Use in notifications
+notify-send "$ICON Script Running" "Using $CURRENT_THEME theme"
+```
+
+## Using hyprctl for Window Management
+
+### Getting Active Window Info
+
+```bash
+#!/bin/bash
+
+# Get information about the currently focused window
+
+# Get active window class
+ACTIVE_CLASS=$(hyprctl activewindow -j | jq -r '.class')
+
+# Get active window title
+ACTIVE_TITLE=$(hyprctl activewindow -j | jq -r '.title')
+
+# Get workspace
+ACTIVE_WORKSPACE=$(hyprctl activewindow -j | jq -r '.workspace.id')
+
+echo "Class: $ACTIVE_CLASS"
+echo "Title: $ACTIVE_TITLE"
+echo "Workspace: $ACTIVE_WORKSPACE"
+```
+
+### Window Manipulation Script
+
+```bash
+#!/bin/bash
+
+# Script to toggle floating mode for active window
+
+toggle_floating() {
+  # Get current floating state
+  IS_FLOATING=$(hyprctl activewindow -j | jq -r '.floating')
+  
+  if [ "$IS_FLOATING" = "true" ]; then
+    hyprctl dispatch togglefloating
+    notify-send "Window" "Tiled"
+  else
+    hyprctl dispatch togglefloating
+    notify-send "Window" "Floating"
+  fi
+}
+
+toggle_floating
+```
+
+### Focus Script Example
+
+```bash
+#!/bin/bash
+
+# Focus or launch an application
+
+APP_CLASS="$1"
+APP_EXEC="$2"
+
+if [ -z "$APP_CLASS" ] || [ -z "$APP_EXEC" ]; then
+  echo "Usage: $0 <window-class> <command>"
+  exit 1
+fi
+
+# Check if window exists
+if hyprctl clients -j | jq -e ".[] | select(.class == \"$APP_CLASS\")" >/dev/null; then
+  # Focus existing window
+  hyprctl dispatch focuswindow "class:$APP_CLASS"
+else
+  # Launch application
+  $APP_EXEC &
+fi
+```
+
+**Usage:**
+```bash
+# Focus or launch Firefox
+focus-or-launch "firefox" "firefox"
+
+# Focus or launch terminal
+focus-or-launch "ghostty" "ghostty"
+```
+
+## Waybar Integration
+
+Create scripts that output JSON for Waybar custom modules:
+
+### Basic Waybar Module Script
+
+```bash
+#!/bin/bash
+
+# Simple text module
+echo '{"text": "Hello", "tooltip": "World"}'
+```
+
+### Weather Module (Existing Example)
+
+Here's the actual weather script from the dotfiles:
+
+```sh
+#!/bin/sh
+
+# Ciudad/Ubicación
+LOCATION="Jaen"
+
+# Obtener datos (filtramos errores de red con --fail)
+WEATHER_DATA=$(curl -s --fail "wttr.in/${LOCATION}?format=j1")
+
+if [ $? -ne 0 ] || [ -z "$WEATHER_DATA" ]; then
+  echo '{"text": "Error", "tooltip": "No se pudo conectar con wttr.in"}'
+  exit 1
+fi
+
+# Extraer datos con jq
+TEMP=$(echo "$WEATHER_DATA" | jq -r '.current_condition[0].temp_C')
+WEATHER_CODE=$(echo "$WEATHER_DATA" | jq -r '.current_condition[0].weatherCode')
+HORA=$(date +%H)
+
+# Función de mapeo
+get_emoji() {
+  code=$1
+  hora=$2
+
+  # Lógica de día: de 07:00 a 19:59
+  if [ "$hora" -ge 7 ] && [ "$hora" -lt 20 ]; then
+    case "$code" in
+      113) echo "☀️" ;;
+      116) echo "🌤️" ;;
+      119 | 122) echo "☁️" ;;
+      143 | 248 | 260 | 263 | 266 | 281 | 284 | 293 | 296 | 299 | 302 | 305 | 308 | 311 | 314 | 317 | 320 | 323 | 326 | 329 | 332 | 335 | 338 | 350 | 353 | 356 | 359 | 362 | 365 | 368 | 371 | 374 | 377 | 386 | 389 | 392 | 395) echo "🌧️" ;;
+      *) echo "❓" ;;
+    esac
+  else
+    # Lógica de noche
+    case "$code" in
+      113) echo "🌙" ;;
+      116 | 119 | 122) echo "☁️" ;;
+      143 | 248 | 260 | 263 | 266 | 281 | 284 | 293 | 296 | 299 | 302 | 305 | 308 | 311 | 314 | 317 | 320 | 323 | 326 | 329 | 332 | 335 | 338 | 350 | 353 | 356 | 359 | 362 | 365 | 368 | 371 | 374 | 377 | 386 | 389 | 392 | 395) echo "🌧️" ;;
+      *) echo "❓" ;;
+    esac
+  fi
+}
+
+EMOJI=$(get_emoji "$WEATHER_CODE" "$HORA")
+
+echo "${EMOJI} ${TEMP}°C"
+```
+
+### Advanced Waybar Module with Click Actions
+
+```bash
+#!/bin/bash
+
+# Module that responds to clicks
+
+# Handle click events from Waybar
+if [ "$1" = "--toggle" ]; then
+  # Do something on click
+  notify-send "Module Clicked" "Performing action"
+  exit 0
+fi
+
+# Normal output
+VALUE=$(some_command)
+echo '{"text": "'"$VALUE"'", "tooltip": "Click to toggle", "class": "custom-module"}'
+```
+
+**Waybar config:**
+```json
+"custom/mymodule": {
+  "exec": "~/.local/bin/my-waybar-script",
+  "interval": 30,
+  "on-click": "~/.local/bin/my-waybar-script --toggle",
+  "return-type": "json"
+}
+```
+
+## Notification Scripts
+
+### Basic Notification
+
+```bash
+#!/bin/bash
+
+notify-send "Title" "Message body" -t 3000
+```
+
+### Advanced Notification with Icons and Actions
+
+```bash
+#!/bin/bash
+
+# Send notification with icon and urgency
+notify-send \
+  --icon="dialog-information" \
+  --urgency=normal \
+  --expire-time=5000 \
+  --app-name="My Script" \
+  "Title" \
+  "Message with details"
+```
+
+### Progress Notification
+
+```bash
+#!/bin/bash
+
+# Show progress in notification
+for i in {0..100..10}; do
+  notify-send \
+    --hint=int:value:$i \
+    --hint=string:synchronous:progress \
+    "Processing" \
+    "$i% complete"
+  sleep 1
+done
+
+notify-send "Complete" "Task finished" -t 2000
+```
+
+## Script Templates
+
+### Application Launcher
+
+```bash
+#!/bin/bash
+
+# Launch application with specific settings
+
+APP_NAME="MyApp"
+APP_EXEC="/usr/bin/myapp"
+APP_ARGS="--config $HOME/.config/myapp/config.conf"
+
+# Check if already running
+if pgrep -x "myapp" >/dev/null; then
+  notify-send "$APP_NAME" "Already running"
+  # Focus window
+  hyprctl dispatch focuswindow "class:myapp"
+else
+  # Launch application
+  $APP_EXEC $APP_ARGS &
+  notify-send "$APP_NAME" "Launched"
+fi
+```
+
+### System Information Script
+
+```bash
+#!/bin/bash
+
+# Collect and display system information
+
+# CPU usage
+CPU=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)
+
+# Memory usage
+MEM=$(free | grep Mem | awk '{printf "%.0f", $3/$2 * 100}')
+
+# Disk usage
+DISK=$(df -h / | awk 'NR==2 {print $5}' | tr -d '%')
+
+# Display
+notify-send "System Info" \
+  "CPU: ${CPU}%\nMemory: ${MEM}%\nDisk: ${DISK}%" \
+  -t 5000
+```
+
+### Screenshot Script
+
+```bash
+#!/bin/bash
+
+# Screenshot script with Hyprland integration
+
+SCREENSHOT_DIR="$HOME/Pictures/Screenshots"
+mkdir -p "$SCREENSHOT_DIR"
+
+FILENAME="screenshot_$(date +%Y%m%d_%H%M%S).png"
+FULL_PATH="$SCREENSHOT_DIR/$FILENAME"
+
+# Take screenshot of region
+grim -g "$(slurp)" "$FULL_PATH"
+
+if [ $? -eq 0 ]; then
+  # Copy to clipboard
+  wl-copy < "$FULL_PATH"
+  
+  notify-send \
+    --icon="$FULL_PATH" \
+    "Screenshot Saved" \
+    "$FILENAME\nCopied to clipboard"
+else
+  notify-send "Screenshot Failed" "Could not capture screen"
+fi
+```
+
+### Rofi/Wofi Menu Script
+
+```bash
+#!/bin/bash
+
+# Create a custom menu with actions
+
+OPTIONS="Lock\nLogout\nReboot\nShutdown"
+
+CHOICE=$(echo -e "$OPTIONS" | wofi --dmenu --prompt "Power Menu:" --width 200 --height 250)
+
+case "$CHOICE" in
+  "Lock")
+    swaylock
+    ;;
+  "Logout")
+    hyprctl dispatch exit
+    ;;
+  "Reboot")
+    systemctl reboot
+    ;;
+  "Shutdown")
+    systemctl poweroff
+    ;;
+esac
+```
+
+## Best Practices
+
+### Error Handling
+
+```bash
+#!/bin/bash
+
+# Enable strict error handling
+set -euo pipefail
+
+# Trap errors
+trap 'echo "Error on line $LINENO"' ERR
+
+# Check dependencies
+check_deps() {
+  for cmd in jq curl hyprctl; do
+    if ! command -v "$cmd" &>/dev/null; then
+      echo "Error: $cmd is not installed"
+      exit 1
+    fi
+  done
+}
+
+check_deps
+```
+
+### Logging
+
+```bash
+#!/bin/bash
+
+LOG_FILE="$HOME/.local/share/myscript.log"
+
+log() {
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
+}
+
+log "Script started"
+# Your code here
+log "Script completed"
+```
+
+### Configuration Files
+
+```bash
+#!/bin/bash
+
+CONFIG_FILE="$HOME/.config/myscript/config.conf"
+
+# Load configuration
+if [ -f "$CONFIG_FILE" ]; then
+  source "$CONFIG_FILE"
+else
+  # Create default config
+  mkdir -p "$(dirname "$CONFIG_FILE")"
+  cat > "$CONFIG_FILE" <<EOF
+# My Script Configuration
+OPTION1="value1"
+OPTION2="value2"
+EOF
+  echo "Created default config: $CONFIG_FILE"
+fi
+```
+
+### Performance Considerations
+
+<Warning>
+  Avoid running expensive operations in scripts that execute frequently (like Waybar modules).
+</Warning>
+
+```bash
+#!/bin/bash
+
+# Cache expensive operations
+CACHE_FILE="/tmp/myscript_cache"
+CACHE_DURATION=300  # 5 minutes
+
+get_data() {
+  if [ -f "$CACHE_FILE" ]; then
+    # Check if cache is still valid
+    AGE=$(($(date +%s) - $(stat -c %Y "$CACHE_FILE")))
+    
+    if [ "$AGE" -lt "$CACHE_DURATION" ]; then
+      cat "$CACHE_FILE"
+      return
+    fi
+  fi
+  
+  # Fetch fresh data
+  DATA=$(expensive_operation)
+  echo "$DATA" > "$CACHE_FILE"
+  echo "$DATA"
+}
+
+get_data
+```
+
+## Making Scripts Executable
+
+After creating a script:
+
+```bash
+# Make executable
+chmod +x ~/.local/bin/my-script
+
+# Test execution
+my-script
+```
+
+## Hyprland Keybindings
+
+Add custom script keybindings to `~/.config/hypr/hyprland.conf`:
+
+```conf
+# Custom scripts
+bind = SUPER, P, exec, ~/.local/bin/my-power-menu
+bind = SUPER_SHIFT, S, exec, ~/.local/bin/my-screenshot
+bind = SUPER, I, exec, ~/.local/bin/system-info
+
+# With arguments
+bind = SUPER, F, exec, ~/.local/bin/focus-or-launch "firefox" "firefox"
+```
+
+## Debugging Scripts
+
+### Enable Debug Output
+
+```bash
+#!/bin/bash
+
+# Enable debug mode
+set -x  # Print commands before executing
+
+# Your script here
+```
+
+### Run with Debug
+
+```bash
+# Run script with bash debug
+bash -x ~/.local/bin/my-script
+
+# Check for syntax errors
+bash -n ~/.local/bin/my-script
+```
+
+### Log Output
+
+```bash
+# Redirect all output to log file
+my-script &> /tmp/script-debug.log
+
+# View log
+cat /tmp/script-debug.log
+```
+
+## Example: Complete Custom Script
+
+Here's a complete example combining multiple concepts:
+
+```bash
+#!/bin/bash
+
+# ==========================================
+# Workspace Manager Script
+# Quickly switch to common workspace layouts
+# ==========================================
+
+set -euo pipefail
+
+CONFIG_FILE="$HOME/.config/workspace-manager/config.conf"
+LOG_FILE="$HOME/.local/share/workspace-manager.log"
+
+# Logging function
+log() {
+  echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" >> "$LOG_FILE"
+}
+
+# Get current theme
+get_theme() {
+  grep "source" "$HOME/.config/hypr/colors/colors.conf" 2>/dev/null | \
+    sed 's/.*custom\/\(.*\)\.conf/\1/' || echo "unknown"
+}
+
+# Workspace layouts
+setup_dev_workspace() {
+  log "Setting up development workspace"
+  
+  # Switch to workspace 1
+  hyprctl dispatch workspace 1
+  
+  # Launch terminal
+  ghostty &
+  sleep 0.5
+  
+  # Launch editor
+  hyprctl dispatch workspace 1
+  code &
+  sleep 0.5
+  
+  # Launch browser on workspace 2
+  hyprctl dispatch workspace 2
+  firefox &
+  
+  # Return to workspace 1
+  hyprctl dispatch workspace 1
+  
+  THEME=$(get_theme)
+  notify-send "🚀 Development Workspace" "Setup complete ($THEME theme)" -t 2000
+}
+
+setup_media_workspace() {
+  log "Setting up media workspace"
+  
+  hyprctl dispatch workspace 3
+  spotify &
+  sleep 0.5
+  
+  # Launch visualizer in floating mode
+  ghostty -e cava &
+  sleep 0.5
+  hyprctl dispatch togglefloating
+  
+  notify-send "🎵 Media Workspace" "Setup complete" -t 2000
+}
+
+# Menu
+OPTIONS="Development\nMedia\nGaming\nCancel"
+CHOICE=$(echo -e "$OPTIONS" | wofi --dmenu --prompt "Setup Workspace:" --width 250 --height 300)
+
+case "$CHOICE" in
+  "Development")
+    setup_dev_workspace
+    ;;
+  "Media")
+    setup_media_workspace
+    ;;
+  "Gaming")
+    log "Gaming workspace selected"
+    notify-send "🎮 Gaming" "Not implemented yet"
+    ;;
+  *)
+    log "Workspace setup cancelled"
+    ;;
+esac
+
+log "Script completed"
+```
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Theme Selector" icon="palette" href="/scripts/theme-selector">
+    Example of interactive menu script
+  </Card>
+  <Card title="Theme Switcher" icon="repeat" href="/scripts/theme-switcher">
+    Example of system configuration script
+  </Card>
+  <Card title="Hyprland Configuration" icon="window-maximize" href="/components/window-manager">
+    Keybindings and window management
+  </Card>
+  <Card title="Waybar" icon="bars" href="/config/waybar">
+    Custom module integration
+  </Card>
+</CardGroup>

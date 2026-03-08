@@ -1,0 +1,340 @@
+---
+title: GNU Stow Management
+description: Learn how to manage dotfiles using GNU Stow in the Kanagawa configuration
+---
+
+## What is GNU Stow?
+
+GNU Stow is a symlink farm manager that makes managing dotfiles incredibly simple. Instead of manually copying configuration files to their destinations, Stow creates symbolic links from a central repository to your system directories.
+
+### Why Use Stow?
+
+- **Version Control**: Keep all your dotfiles in one git repository
+- **Easy Backup**: Just backup your dotfiles directory
+- **Clean Uninstall**: Remove all configs by unstowing
+- **Selective Installation**: Install only what you need
+- **No File Duplication**: Uses symlinks, not copies
+
+## Repository Structure
+
+The Kanagawa dotfiles repository is organized specifically for Stow:
+
+```plaintext
+~/dotfiles/
+├── config/           # Maps to ~/.config/
+│   ├── hypr/
+│   ├── waybar/
+│   ├── ghostty/
+│   ├── nvim/
+│   ├── wofi/
+│   ├── swaync/
+│   ├── btop/
+│   ├── cava/
+│   ├── fastfetch/
+│   └── zellij/
+├── scripts/          # Maps to ~/.local/bin/
+│   ├── theme-switcher
+│   ├── theme-selector
+│   └── weather
+├── shell/            # Maps to ~/
+│   └── .zshrc
+└── install.sh        # Installation script
+```
+
+<Tip>
+Each top-level directory in the repository represents a **stow package**. The directory structure inside each package mirrors where files should be linked on your system.
+</Tip>
+
+## How the Install Script Works
+
+The `install.sh` script automates the stow process:
+
+```bash
+#!/bin/bash
+
+# Colores para la terminal
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e "${GREEN}Iniciando instalación de dotfiles... ${NC}"
+
+# Crear carpeta .config si no existe
+mkdir -p ~/.config
+mkdir -p ~/.local/bin
+
+# stow -v (verbose) -R (recursive) -t (target)
+# Linkeamos lo que hay dentro de la carpeta 'config' a ~/.config
+stow -v -R -t ~/.config config
+stow -v -R -t ~/.local/bin scripts
+
+# Linkeamos lo que hay en 'shell' al HOME
+stow -v -R -t ~ shell
+
+echo -e "${GREEN}¡Todo listo! Enlaces creados.${NC}"
+```
+
+### Command Breakdown
+
+<Steps>
+  <Step title="Create directories">
+    ```bash
+    mkdir -p ~/.config
+    mkdir -p ~/.local/bin
+    ```
+    Ensures target directories exist before stowing
+  </Step>
+
+  <Step title="Stow config files">
+    ```bash
+    stow -v -R -t ~/.config config
+    ```
+    - `-v`: Verbose output (shows what's being linked)
+    - `-R`: Restow (removes old links and creates new ones)
+    - `-t ~/.config`: Target directory
+    - `config`: Package name to stow
+  </Step>
+
+  <Step title="Stow scripts">
+    ```bash
+    stow -v -R -t ~/.local/bin scripts
+    ```
+    Links scripts to `~/.local/bin` for command-line access
+  </Step>
+
+  <Step title="Stow shell config">
+    ```bash
+    stow -v -R -t ~ shell
+    ```
+    Links shell configurations (like `.zshrc`) to your home directory
+  </Step>
+</Steps>
+
+## Manual Stow Commands
+
+You can also use stow commands directly:
+
+### Install/Update Configurations
+
+```bash
+# Stow all packages
+cd ~/dotfiles
+stow -v -R -t ~/.config config
+stow -v -R -t ~/.local/bin scripts
+stow -v -R -t ~ shell
+
+# Stow a single package
+stow -v -t ~/.config config
+```
+
+### Remove Configurations
+
+```bash
+# Unstow (remove symlinks) for all packages
+cd ~/dotfiles
+stow -D -t ~/.config config
+stow -D -t ~/.local/bin scripts
+stow -D -t ~ shell
+
+# Unstow a single package
+stow -D -t ~/.config config
+```
+
+### Check What Would Be Done
+
+```bash
+# Dry run (no actual changes)
+stow -n -v -t ~/.config config
+```
+
+## Adding New Configurations
+
+To add a new application configuration to your dotfiles:
+
+<Steps>
+  <Step title="Create the directory structure">
+    ```bash
+    cd ~/dotfiles/config
+    mkdir -p your-app
+    ```
+  </Step>
+
+  <Step title="Copy your config files">
+    ```bash
+    # Copy existing config to dotfiles
+    cp ~/.config/your-app/config.conf ~/dotfiles/config/your-app/
+    ```
+  </Step>
+
+  <Step title="Remove original and stow">
+    ```bash
+    # Remove original (backup first!)
+    rm -rf ~/.config/your-app
+    
+    # Restow to create symlink
+    cd ~/dotfiles
+    stow -v -R -t ~/.config config
+    ```
+  </Step>
+
+  <Step title="Verify the symlink">
+    ```bash
+    ls -la ~/.config/your-app
+    # Should show: your-app -> ../dotfiles/config/your-app
+    ```
+  </Step>
+</Steps>
+
+### Example: Adding Kitty Terminal
+
+```bash
+cd ~/dotfiles/config
+mkdir -p kitty
+cp ~/.config/kitty/kitty.conf kitty/
+rm -rf ~/.config/kitty
+cd ~/dotfiles
+stow -v -R -t ~/.config config
+```
+
+## Removing Configurations
+
+To temporarily remove a configuration without deleting it:
+
+```bash
+# Unstow just that package
+cd ~/dotfiles
+stow -D -t ~/.config config
+
+# Or manually delete the symlink
+rm ~/.config/app-name
+```
+
+To permanently remove:
+
+```bash
+# Unstow first
+stow -D -t ~/.config config
+
+# Then remove from repository
+rm -rf ~/dotfiles/config/app-name
+
+# Commit the change
+git add -A
+git commit -m "Remove app-name configuration"
+```
+
+## Troubleshooting Stow
+
+<Warning>
+Stow will refuse to create links if:
+- Target files already exist (not symlinks)
+- Directory structure conflicts exist
+- You don't have write permissions
+</Warning>
+
+### Common Issues
+
+**Error: "WARNING! stowing config would cause conflicts"**
+
+This means files already exist at the target location.
+
+```bash
+# Backup existing config
+mv ~/.config/hypr ~/.config/hypr.backup
+
+# Then stow again
+stow -v -R -t ~/.config config
+```
+
+**Error: "Target already exists"**
+
+A non-symlink file/directory exists at the target.
+
+```bash
+# Check what's there
+ls -la ~/.config/app-name
+
+# If it's not a symlink, backup and remove
+mv ~/.config/app-name ~/.config/app-name.backup
+```
+
+**Checking Symlink Status**
+
+```bash
+# See if a directory is a symlink
+ls -la ~/.config/hypr
+# Output: hypr -> ../../dotfiles/config/hypr
+
+# Find all symlinks in .config
+find ~/.config -type l -ls
+```
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Use Git" icon="git-alt">
+    Always version control your dotfiles repository
+    ```bash
+    cd ~/dotfiles
+    git add -A
+    git commit -m "Update config"
+    git push
+    ```
+  </Card>
+
+  <Card title="Test Before Committing" icon="flask">
+    Verify configs work before committing
+    ```bash
+    # Test the config
+    hyprctl reload
+    
+    # If good, commit
+    git commit -am "Update Hyprland config"
+    ```
+  </Card>
+
+  <Card title="Use Branches" icon="code-branch">
+    Test major changes in branches
+    ```bash
+    git checkout -b test-new-config
+    # Make changes
+    git checkout main
+    ```
+  </Card>
+
+  <Card title="Document Changes" icon="book">
+    Add comments to complex configurations
+    ```conf
+    # Custom keybinding for theme switcher
+    bind = $mainMod SHIFT, return, exec, theme-selector
+    ```
+  </Card>
+</CardGroup>
+
+## Advanced: Selective Stowing
+
+You can stow individual subdirectories if needed:
+
+```bash
+# Only stow Hyprland config
+cd ~/dotfiles/config
+stow -v -t ~/.config hypr
+
+# Only stow Waybar config  
+stow -v -t ~/.config waybar
+```
+
+<Tip>
+This is useful when testing configurations for a single application without affecting others.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Adding Themes" href="/guides/adding-themes" icon="palette">
+    Learn how to add custom color themes
+  </Card>
+  
+  <Card title="Customization" href="/guides/customization" icon="sliders">
+    Customize keybindings, fonts, and more
+  </Card>
+</CardGroup>

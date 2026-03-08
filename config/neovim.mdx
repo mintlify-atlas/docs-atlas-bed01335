@@ -1,0 +1,428 @@
+---
+title: 'Neovim Configuration'
+description: 'LazyVim-based Neovim setup with theme integration and custom plugins'
+icon: 'pen-nib'
+---
+
+## Overview
+
+The Kanagawa dotfiles include a powerful Neovim configuration based on [LazyVim](https://www.lazyvim.org/), featuring automatic theme synchronization, custom plugins, and optimized settings for modern development.
+
+<Note>
+This setup uses LazyVim as the base configuration framework, with custom plugins and theme integration via `theme_bridge.lua`.
+</Note>
+
+## Configuration Structure
+
+```bash
+~/.config/nvim/
+├── init.lua                 # Main entry point
+├── lua/
+│   ├── config/             # LazyVim configuration
+│   │   ├── lazy.lua        # Lazy.nvim setup
+│   │   ├── options.lua     # Vim options
+│   │   ├── keymaps.lua     # Custom keymaps
+│   │   └── autocmds.lua    # Autocommands
+│   ├── plugins/            # Custom plugins
+│   │   ├── themes.lua      # Theme definitions
+│   │   ├── smear.lua       # Smear cursor plugin
+│   │   ├── render-markdown.lua
+│   │   ├── live-preview.lua
+│   │   └── sidekick.lua
+│   ├── custom/             # Custom modules
+│   │   └── smart_runner.lua
+│   └── theme_bridge.lua    # Theme synchronization
+```
+
+## Main Configuration
+
+The `init.lua` file bootstraps LazyVim and adds custom functionality:
+
+```lua
+-- bootstrap lazy.nvim, LazyVim and your plugins
+require("config.lazy")
+
+-- Enable auto-save globally
+vim.o.autowriteall = true
+
+-- Auto-save on insert leave and text change
+vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged", "TextChangedP" }, {
+  pattern = "*",
+  callback = function()
+    vim.cmd("silent! write")
+  end,
+})
+```
+
+<Tabs>
+  <Tab title="Lazy.nvim Setup">
+    ## Plugin Manager Configuration
+
+    The `lua/config/lazy.lua` file configures the Lazy.nvim plugin manager:
+
+    ```lua
+    require("lazy").setup({
+      spec = {
+        -- Load LazyVim and its plugins
+        { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+        
+        -- AI plugins
+        { import = "lazyvim.plugins.extras.ai.copilot" },
+        
+        -- Debugging support
+        { import = "lazyvim.plugins.extras.dap.core" },
+        { import = "lazyvim.plugins.extras.lang.python" },
+        
+        -- Import custom plugins
+        { import = "plugins" },
+      },
+      defaults = {
+        lazy = false,
+        version = false,
+      },
+      checker = {
+        enabled = true,
+        notify = false,
+      },
+    })
+    ```
+
+    <CardGroup cols={2}>
+      <Card title="LazyVim Base" icon="rocket">
+        Pre-configured Neovim distribution
+      </Card>
+      <Card title="GitHub Copilot" icon="robot">
+        AI-powered code completion
+      </Card>
+      <Card title="DAP Debugging" icon="bug">
+        Debug Adapter Protocol support
+      </Card>
+      <Card title="Python Support" icon="python">
+        Full Python development environment
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="Language Support">
+    ## LSP Configuration
+
+    ### Mason Setup
+
+    ```lua
+    require("mason").setup()
+    require("mason-lspconfig").setup({
+        ensure_installed = { "angularls", "ts_ls" }
+    })
+    ```
+
+    ### Angular Configuration
+
+    ```lua
+    local lspconfig = require('lspconfig')
+
+    -- Angular Language Server
+    lspconfig.angularls.setup({
+      root_dir = lspconfig.util.root_pattern(
+        "angular.json", 
+        "nx.json", 
+        "package.json"
+      ),
+    })
+
+    -- TypeScript Language Server
+    lspconfig.ts_ls.setup({})
+    ```
+
+    ### Angular Template Support
+
+    ```lua
+    vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+      pattern = {"*.component.html"},
+      callback = function()
+        vim.opt.filetype = "html.angular"
+      end,
+    })
+    ```
+
+    <Note>
+    This configuration provides full Angular support including template syntax highlighting and LSP features.
+    </Note>
+  </Tab>
+
+  <Tab title="Auto-save">
+    ## Automatic File Saving
+
+    Files are automatically saved when:
+
+    - Leaving insert mode
+    - Text is changed
+    - Text is changed in insert mode
+
+    ```lua
+    vim.o.autowriteall = true
+
+    vim.api.nvim_create_autocmd(
+      { "InsertLeave", "TextChanged", "TextChangedP" }, 
+      {
+        pattern = "*",
+        callback = function()
+          vim.cmd("silent! write")
+        end,
+      }
+    )
+    ```
+
+    <Warning>
+    Auto-save is silent and won't show save notifications. Make sure you're comfortable with this behavior.
+    </Warning>
+  </Tab>
+</Tabs>
+
+## Theme Integration
+
+### Theme Bridge System
+
+The `theme_bridge.lua` file synchronizes Neovim's theme with the system theme:
+
+```lua
+-- lua/theme_bridge.lua
+return 'everforest'
+```
+
+### Theme Plugin Configuration
+
+The `lua/plugins/themes.lua` file defines all available themes and loads the active one:
+
+```lua
+local status_ok, theme_bridge = pcall(require, "theme_bridge")
+local current_theme = status_ok and theme_bridge or "kanagawa-wave"
+
+return {
+  -- Catppuccin
+  {
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
+    opts = {
+      flavour = "mocha",
+      transparent_background = true,
+      term_colors = true,
+    },
+  },
+  
+  -- Gruvbox
+  {
+    "ellisonleao/gruvbox.nvim",
+    priority = 1000,
+    config = function()
+      require("gruvbox").setup({
+        transparent_mode = true,
+      })
+    end,
+  },
+  
+  -- Everforest
+  {
+    "neanias/everforest-nvim",
+    name = "everforest",
+    version = false,
+    lazy = false,
+    priority = 1000,
+  },
+  
+  -- Kanagawa
+  {
+    "rebelot/kanagawa.nvim",
+    name = "kanagawa",
+    priority = 1000,
+    lazy = true,
+    config = function()
+      require("kanagawa").setup({
+        transparent = true,
+        dimInactive = false,
+        terminalColors = true,
+        overrides = function(colors)
+          return {
+            LineNr = { bg = "none" },
+            NormalFloat = { bg = "none" },
+            FloatBorder = { bg = "none" },
+            TelescopeNormal = { bg = "none" },
+            TelescopeBorder = { bg = "none" },
+          }
+        end,
+      })
+    end,
+  },
+  
+  -- Apply theme dynamically
+  {
+    "LazyVim/LazyVim",
+    opts = {
+      colorscheme = current_theme,
+    },
+  },
+}
+```
+
+<Steps>
+  <Step title="Theme Bridge Read">
+    Neovim reads the current theme from `theme_bridge.lua`
+  </Step>
+  <Step title="Plugin Load">
+    The corresponding theme plugin is loaded with transparent background
+  </Step>
+  <Step title="Apply Colorscheme">
+    LazyVim applies the colorscheme on startup
+  </Step>
+</Steps>
+
+## Custom Plugins
+
+### Smear Cursor
+
+Smooth cursor animation plugin:
+
+```lua
+-- lua/plugins/smear.lua
+return {
+  "sphamba/smear-cursor.nvim",
+  opts = {
+    stiffness = 0.8,
+    trailing_stiffness = 0.6,
+    stiffness_insert_mode = 0.7,
+    trailing_stiffness_insert_mode = 0.7,
+    damping = 0.95,
+    damping_insert_mode = 0.95,
+    distance_stop_animating = 0.5,
+  },
+}
+```
+
+<CardGroup cols={2}>
+  <Card title="Smear Cursor" icon="mouse-pointer">
+    Smooth, animated cursor movements
+  </Card>
+  <Card title="Render Markdown" icon="markdown">
+    Live markdown rendering in Neovim
+  </Card>
+  <Card title="Live Preview" icon="eye">
+    Real-time preview for web development
+  </Card>
+  <Card title="CMake Tools" icon="hammer">
+    C/C++ build integration
+  </Card>
+</CardGroup>
+
+## Available Themes
+
+<Tabs>
+  <Tab title="Everforest">
+    ## Everforest Theme
+
+    A comfortable, warm theme with excellent readability:
+
+    ```lua
+    {
+      "neanias/everforest-nvim",
+      name = "everforest",
+    }
+    ```
+
+    **Current default theme** in the Kanagawa dotfiles.
+  </Tab>
+
+  <Tab title="Kanagawa">
+    ## Kanagawa Theme
+
+    Dark theme inspired by the famous painting "The Great Wave off Kanagawa":
+
+    ```lua
+    {
+      "rebelot/kanagawa.nvim",
+      name = "kanagawa",
+    }
+    ```
+
+    Features custom transparency and float window styling.
+  </Tab>
+
+  <Tab title="Catppuccin">
+    ## Catppuccin Mocha
+
+    Pastel theme with excellent color harmony:
+
+    ```lua
+    {
+      "catppuccin/nvim",
+      name = "catppuccin",
+      opts = {
+        flavour = "mocha",
+        transparent_background = true,
+      },
+    }
+    ```
+  </Tab>
+
+  <Tab title="Gruvbox">
+    ## Gruvbox
+
+    Classic, retro groove theme:
+
+    ```lua
+    {
+      "ellisonleao/gruvbox.nvim",
+      config = function()
+        require("gruvbox").setup({
+          transparent_mode = true,
+        })
+      end,
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="LazyVim Base" icon="rocket">
+    Pre-configured distribution with sensible defaults
+  </Card>
+  <Card title="Theme Sync" icon="palette">
+    Automatic theme synchronization with system
+  </Card>
+  <Card title="LSP Support" icon="code">
+    Language servers for TypeScript, Angular, Python, and more
+  </Card>
+  <Card title="Auto-save" icon="floppy-disk">
+    Automatic file saving on changes
+  </Card>
+  <Card title="GitHub Copilot" icon="robot">
+    AI-powered code completion
+  </Card>
+  <Card title="DAP Debugging" icon="bug">
+    Full debugging capabilities
+  </Card>
+</CardGroup>
+
+## Plugin Management
+
+All plugins are managed by Lazy.nvim:
+
+```bash
+# Inside Neovim
+:Lazy          # Open plugin manager
+:Lazy update   # Update all plugins
+:Lazy sync     # Sync plugins with config
+:Lazy clean    # Remove unused plugins
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Theme Selection" icon="paintbrush" href="/scripts/theme-selector">
+    Switch between themes easily
+  </Card>
+  <Card title="Keybindings" icon="keyboard" href="/components/window-manager">
+    Learn Neovim keybindings
+  </Card>
+</CardGroup>

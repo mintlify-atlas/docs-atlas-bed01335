@@ -1,0 +1,501 @@
+---
+title: 'Shell Configuration'
+description: 'Zsh, Oh My Zsh, and Powerlevel10k configuration for a powerful terminal experience'
+icon: 'terminal'
+---
+
+## Overview
+
+The Kanagawa dotfiles include a comprehensive Zsh configuration featuring Oh My Zsh, Powerlevel10k prompt, useful plugins, and modern CLI tool integrations.
+
+<Note>
+The shell configuration prioritizes speed, functionality, and aesthetics with carefully selected plugins and tool integrations.
+</Note>
+
+## Configuration Structure
+
+```bash
+~/
+├── .zshrc              # Main Zsh configuration
+├── .p10k.zsh          # Powerlevel10k configuration
+└── .oh-my-zsh/        # Oh My Zsh installation
+    └── custom/
+        └── plugins/
+```
+
+## Main Configuration
+
+The `.zshrc` file is organized into logical sections:
+
+<Steps>
+  <Step title="Fastfetch">
+    Display system information on new terminal sessions
+  </Step>
+  <Step title="Powerlevel10k Instant Prompt">
+    Fast prompt initialization
+  </Step>
+  <Step title="Environment Setup">
+    PATH, JAVA_HOME, Android SDK, and other variables
+  </Step>
+  <Step title="Oh My Zsh">
+    Theme and plugin configuration
+  </Step>
+  <Step title="Tool Integration">
+    Zoxide, Atuin, and other CLI tools
+  </Step>
+  <Step title="Aliases">
+    Custom command shortcuts
+  </Step>
+  <Step title="Powerlevel10k Config">
+    Load P10k configuration
+  </Step>
+</Steps>
+
+## Fastfetch Integration
+
+```bash
+if [[ -t 1 && -z "$FASTFETCH_DONE" ]]; then
+  export FASTFETCH_DONE=1
+  fastfetch
+fi
+```
+
+Shows system information (OS, kernel, packages, etc.) once per session.
+
+<CardGroup cols={2}>
+  <Card title="Only Once" icon="check">
+    FASTFETCH_DONE prevents repeated displays
+  </Card>
+  <Card title="TTY Check" icon="terminal">
+    Only runs in interactive terminals
+  </Card>
+</CardGroup>
+
+## Powerlevel10k Theme
+
+```bash
+# Instant prompt for fast startup
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Set theme
+ZSH_THEME="powerlevel10k/powerlevel10k"
+```
+
+<Tabs>
+  <Tab title="Features">
+    ## Powerlevel10k Features
+
+    <CardGroup cols={2}>
+      <Card title="Instant Prompt" icon="bolt">
+        Shows prompt immediately, even before plugins load
+      </Card>
+      <Card title="Git Integration" icon="git">
+        Detailed git status in prompt
+      </Card>
+      <Card title="Performance" icon="gauge-high">
+        Optimized for speed and low latency
+      </Card>
+      <Card title="Customizable" icon="sliders">
+        Highly configurable prompt elements
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="Configuration">
+    ## Customizing P10k
+
+    Run the configuration wizard:
+
+    ```bash
+    p10k configure
+    ```
+
+    This opens an interactive wizard to customize:
+    - Prompt style (lean, classic, rainbow, etc.)
+    - Icons and symbols
+    - Colors
+    - Prompt elements
+    - Separators and spacing
+
+    Configuration is saved to `~/.p10k.zsh`.
+  </Tab>
+</Tabs>
+
+## Environment Variables
+
+### Path Configuration
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+export PATH=/home/nico/.opencode/bin:$PATH
+```
+
+### Java and Android
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/default
+
+export ANDROID_HOME=$HOME/Android/Sdk
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/tools
+export PATH=$PATH:$ANDROID_HOME/tools/bin
+```
+
+### Flutter
+
+```bash
+export PATH=$PATH:$HOME/development/flutter/bin
+```
+
+<Note>
+These paths enable development tools for Android, Flutter, and other platforms.
+</Note>
+
+## Oh My Zsh Plugins
+
+```bash
+plugins=(
+    git 
+    zsh-autosuggestions 
+    zsh-syntax-highlighting 
+    sudo
+)
+
+source $ZSH/oh-my-zsh.sh
+```
+
+<Tabs>
+  <Tab title="git">
+    ## Git Plugin
+
+    Provides numerous git aliases and functions:
+
+    | Alias | Command | Description |
+    |-------|---------|-------------|
+    | `gst` | `git status` | Show working tree status |
+    | `ga` | `git add` | Add files to staging |
+    | `gc` | `git commit -v` | Commit with verbose output |
+    | `gp` | `git push` | Push commits |
+    | `gl` | `git pull` | Pull changes |
+    | `gco` | `git checkout` | Switch branches |
+    | `gcb` | `git checkout -b` | Create and switch to branch |
+    | `gd` | `git diff` | Show changes |
+    | `glg` | `git log --graph` | Graph log view |
+
+    **Built-in with Oh My Zsh** - no installation needed.
+  </Tab>
+
+  <Tab title="zsh-autosuggestions">
+    ## Autosuggestions Plugin
+
+    Suggests commands as you type based on history:
+
+    ```bash
+    # Install
+    git clone https://github.com/zsh-users/zsh-autosuggestions \
+      ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+    ```
+
+    **Usage**:
+    - Start typing a command
+    - See gray suggestion appear
+    - Press `→` (right arrow) to accept
+    - Press `Alt+→` to accept one word
+
+    <CardGroup cols={2}>
+      <Card title="History-based" icon="clock">
+        Suggestions from command history
+      </Card>
+      <Card title="Non-intrusive" icon="eye">
+        Gray text doesn't interfere with typing
+      </Card>
+    </CardGroup>
+  </Tab>
+
+  <Tab title="zsh-syntax-highlighting">
+    ## Syntax Highlighting Plugin
+
+    Colors commands as you type:
+
+    ```bash
+    # Install
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting \
+      ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+    ```
+
+    **Features**:
+    - Green: Valid command
+    - Red: Invalid/unknown command
+    - Blue: Path that exists
+    - Underline: Options and flags
+
+    Helps catch typos before execution.
+  </Tab>
+
+  <Tab title="sudo">
+    ## Sudo Plugin
+
+    Press `Esc` twice to prepend `sudo` to the current command.
+
+    ```bash
+    # Type a command
+    apt update
+    
+    # Press Esc twice
+    # Becomes:
+    sudo apt update
+    ```
+
+    **Built-in with Oh My Zsh** - no installation needed.
+
+    <Note>
+    This is incredibly useful when you forget to add sudo to a command.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Modern CLI Tool Integration
+
+### Zoxide (Smart cd)
+
+```bash
+eval "$(zoxide init zsh)"
+```
+
+**Usage**:
+```bash
+z dotfiles    # Jump to ~/dotfiles from anywhere
+z conf nvim   # Jump to ~/.config/nvim
+zi            # Interactive selection
+```
+
+Zoxide tracks your most-used directories and lets you jump to them with partial names.
+
+### Atuin (Shell History)
+
+```bash
+[[ $- == *i* ]] && eval "$(atuin init zsh)"
+```
+
+**Features**:
+- Sync shell history across machines
+- Better history search with Ctrl+R
+- Statistics and insights
+- SQLite-backed storage
+
+<CardGroup cols={2}>
+  <Card title="Zoxide" icon="compass">
+    Smart directory jumping based on frequency
+  </Card>
+  <Card title="Atuin" icon="clock-rotate-left">
+    Enhanced shell history with sync
+  </Card>
+</CardGroup>
+
+## Custom Aliases
+
+```bash
+alias dots='cd ~/dotfiles'
+alias ls='eza --icons --group-directories-first'
+alias cat='bat --paging=never'
+alias oc='opencode'
+alias phpmyadmin='sudo systemctl start mariadb httpd && xdg-open http://localhost/phpmyadmin'
+```
+
+<Tabs>
+  <Tab title="Navigation">
+    ### Navigation Aliases
+
+    ```bash
+    alias dots='cd ~/dotfiles'
+    ```
+
+    Quick access to the dotfiles directory.
+  </Tab>
+
+  <Tab title="Enhanced Commands">
+    ### Modern Replacements
+
+    ```bash
+    alias ls='eza --icons --group-directories-first'
+    alias cat='bat --paging=never'
+    ```
+
+    - **eza**: Modern ls replacement with icons and colors
+    - **bat**: cat with syntax highlighting
+
+    <Note>
+    Make sure `eza` and `bat` are installed for these aliases to work.
+    </Note>
+  </Tab>
+
+  <Tab title="Development">
+    ### Development Aliases
+
+    ```bash
+    alias oc='opencode'
+    alias phpmyadmin='sudo systemctl start mariadb httpd && xdg-open http://localhost/phpmyadmin'
+    ```
+
+    Quick shortcuts for development tools and services.
+  </Tab>
+</Tabs>
+
+## Lazy Loading
+
+### Conda
+
+```bash
+conda() {
+  unset -f conda
+  source /home/nico/miniconda/etc/profile.d/conda.sh
+  conda "$@"
+}
+```
+
+Conda is loaded on-demand, speeding up shell startup significantly.
+
+**Why?** Conda initialization is slow. This function only loads it when you first use the `conda` command.
+
+<Warning>
+The first `conda` command will have a slight delay while it initializes. Subsequent commands are instant.
+</Warning>
+
+## Installation Requirements
+
+To use this configuration, install the following:
+
+<AccordionGroup>
+  <Accordion title="Core Requirements">
+    ```bash
+    # Oh My Zsh
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    
+    # Powerlevel10k
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
+      ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+    ```
+  </Accordion>
+
+  <Accordion title="Plugins">
+    ```bash
+    # zsh-autosuggestions
+    git clone https://github.com/zsh-users/zsh-autosuggestions \
+      ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+    
+    # zsh-syntax-highlighting
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting \
+      ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+    ```
+  </Accordion>
+
+  <Accordion title="Modern CLI Tools">
+    ```bash
+    # Arch Linux
+    sudo pacman -S zoxide atuin eza bat fastfetch
+    
+    # Ubuntu/Debian
+    # Install from respective GitHub releases or cargo
+    cargo install zoxide atuin eza bat
+    ```
+  </Accordion>
+
+  <Accordion title="Nerd Fonts">
+    Install a Nerd Font for proper icon display:
+
+    ```bash
+    # Download and install CaskaydiaCove Nerd Font
+    # https://www.nerdfonts.com/font-downloads
+    ```
+
+    Set the font in your terminal emulator settings.
+  </Accordion>
+</AccordionGroup>
+
+## Performance Optimization
+
+<CardGroup cols={2}>
+  <Card title="Instant Prompt" icon="bolt">
+    P10k instant prompt shows immediately
+  </Card>
+  <Card title="Lazy Loading" icon="hourglass">
+    Conda and heavy tools load on-demand
+  </Card>
+  <Card title="Minimal Plugins" icon="puzzle-piece">
+    Only essential plugins enabled
+  </Card>
+  <Card title="Fastfetch Once" icon="check">
+    System info shown once per session
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Slow startup">
+    - Check plugin load times: `time zsh -i -c exit`
+    - Disable plugins one by one to identify the culprit
+    - Ensure P10k instant prompt is working
+  </Accordion>
+
+  <Accordion title="Icons not showing">
+    - Install a Nerd Font
+    - Configure your terminal to use the Nerd Font
+    - Restart the terminal
+  </Accordion>
+
+  <Accordion title="Autosuggestions not working">
+    - Verify plugin is installed
+    - Check it's listed in the `plugins=()` array
+    - Source `.zshrc` again: `source ~/.zshrc`
+  </Accordion>
+
+  <Accordion title="Conda command not found">
+    The lazy loading function requires the Miniconda path to be correct. Update the path in the `conda()` function if needed.
+  </Accordion>
+</AccordionGroup>
+
+## Customization Tips
+
+<Accordion title="Adding Custom Aliases">
+  Add aliases at the end of `.zshrc`:
+
+  ```bash
+  alias myalias='command here'
+  alias gs='git status'
+  alias v='nvim'
+  ```
+
+  Then reload: `source ~/.zshrc`
+</Accordion>
+
+<Accordion title="Changing Prompt Style">
+  Run the P10k configuration wizard:
+
+  ```bash
+  p10k configure
+  ```
+
+  Choose your preferred style, icons, and colors.
+</Accordion>
+
+<Accordion title="Adding More Plugins">
+  1. Find the plugin on GitHub
+  2. Clone to `${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/plugin-name`
+  3. Add `plugin-name` to the `plugins=()` array
+  4. Reload: `source ~/.zshrc`
+</Accordion>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Ghostty Terminal" icon="terminal" href="/config/ghostty">
+    Configure the terminal emulator
+  </Card>
+  <Card title="Scripts" icon="code" href="/scripts/theme-selector">
+    Explore automation scripts
+  </Card>
+</CardGroup>

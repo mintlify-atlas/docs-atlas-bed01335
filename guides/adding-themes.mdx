@@ -1,0 +1,516 @@
+---
+title: Adding New Themes
+description: Complete guide to creating and adding custom color themes to your Kanagawa setup
+---
+
+## Theme System Overview
+
+The Kanagawa dotfiles use a unified theming system that applies colors across all components:
+
+- **Hyprland** (window manager colors)
+- **Waybar** (status bar)
+- **Wofi** (application launcher)
+- **Ghostty** (terminal)
+- **Swaync** (notification center)
+- **Wlogout** (logout menu)
+- **Neovim** (text editor)
+- **VSCodium** (code editor)
+- **Btop** (system monitor)
+- **Cava** (audio visualizer)
+
+All themes are managed by the `theme-switcher` script located at `~/.local/bin/theme-switcher`.
+
+## Existing Themes
+
+The following themes are included by default:
+
+- **kanagawa** - Warm, soft Sumi Ink palette (default)
+- **gruvbox** - Retro groove color scheme  
+- **catppuccin** - Soothing pastel theme
+- **everforest** - Comfortable green forest theme
+
+## Creating a New Theme
+
+Let's walk through creating a complete new theme called "nord".
+
+<Steps>
+  <Step title="Choose your color palette">
+    First, define your color palette. Nord uses arctic, north-bluish colors:
+
+    ```plaintext
+    # Nord Color Palette
+    bg0:     #2E3440  (Polar Night)
+    bg1:     #3B4252
+    bg2:     #434C5E
+    bg3:     #4C566A
+    
+    fg:      #ECEFF4  (Snow Storm)
+    
+    red:     #BF616A  (Aurora Red)
+    orange:  #D08770  (Aurora Orange)
+    yellow:  #EBCB8B  (Aurora Yellow)
+    green:   #A3BE8C  (Aurora Green)
+    aqua:    #8FBCBB  (Frost)
+    blue:    #88C0D0  (Frost)
+    purple:  #B48EAD  (Aurora Purple)
+    ```
+  </Step>
+
+  <Step title="Create Hyprland color file">
+    Create `~/dotfiles/config/hypr/colors/custom/nord.conf`:
+
+    ```conf
+    ##############################################################
+    ## Tema: Nord                                                ##
+    ## Descripción: Arctic, north-bluish color palette          ##
+    ##############################################################
+
+    # Backgrounds (Polar Night)
+    $bg0 = 2E3440 # Darkest
+    $bg1 = 3B4252 # Main background
+    $bg2 = 434C5E
+    $bg3 = 4C566A
+    $bg4 = 4C566A
+
+    # Foreground (Snow Storm)
+    $fg  = ECEFF4
+
+    # Aurora Colors
+    $red    = BF616A
+    $orange = D08770
+    $yellow = EBCB8B
+    $green  = A3BE8C
+    $aqua   = 8FBCBB
+    $blue   = 88C0D0
+    $purple = B48EAD
+    $pink   = B48EAD
+
+    # Greys
+    $grey0 = 4C566A
+    $grey1 = 4C566A
+    $grey2 = 434C5E
+    ```
+
+    <Tip>
+    Color values in Hyprland conf files are **hex without the `#` symbol**.
+    </Tip>
+  </Step>
+
+  <Step title="Create Waybar CSS colors">
+    Create `~/dotfiles/config/waybar/colors/custom/nord.css`:
+
+    ```css
+    /**************************************************************
+    ** Tema: Nord                                                **
+    ** Descripción: Arctic, north-bluish color palette          **
+    **************************************************************/
+
+    /* Backgrounds (Polar Night) */
+    @define-color bg0 #2E3440; /* Darkest */
+    @define-color bg1 #3B4252; /* Main background */
+    @define-color bg2 #434C5E;
+    @define-color bg3 #4C566A;
+    @define-color bg4 #4C566A;
+
+    /* Foreground (Snow Storm) */
+    @define-color fg  #ECEFF4;
+
+    /* Aurora Colors */
+    @define-color red    #BF616A;
+    @define-color orange #D08770;
+    @define-color yellow #EBCB8B;
+    @define-color green  #A3BE8C;
+    @define-color aqua   #8FBCBB;
+    @define-color blue   #88C0D0;
+    @define-color purple #B48EAD;
+    @define-color pink   #B48EAD;
+
+    /* Greys */
+    @define-color grey0 #4C566A;
+    @define-color grey1 #4C566A;
+    @define-color grey2 #434C5E;
+    ```
+
+    <Tip>
+    CSS color files use `@define-color` and include the `#` symbol.
+    </Tip>
+  </Step>
+
+  <Step title="Create Wofi CSS colors">
+    Create `~/dotfiles/config/wofi/colors/custom/nord.css`:
+
+    ```css
+    /**************************************************************
+    ** Tema: Nord                                                **
+    ** Descripción: Arctic, north-bluish color palette          **
+    **************************************************************/
+
+    /* Same format as Waybar */
+    @define-color bg0 #2E3440;
+    @define-color bg1 #3B4252;
+    @define-color bg2 #434C5E;
+    @define-color bg3 #4C566A;
+    @define-color bg4 #4C566A;
+
+    @define-color fg  #ECEFF4;
+
+    @define-color red    #BF616A;
+    @define-color orange #D08770;
+    @define-color yellow #EBCB8B;
+    @define-color green  #A3BE8C;
+    @define-color aqua   #8FBCBB;
+    @define-color blue   #88C0D0;
+    @define-color purple #B48EAD;
+    @define-color pink   #B48EAD;
+
+    @define-color grey0 #4C566A;
+    @define-color grey1 #4C566A;
+    @define-color grey2 #434C5E;
+    ```
+  </Step>
+
+  <Step title="Create Ghostty terminal colors">
+    Create `~/dotfiles/config/ghostty/colors/custom/nord`:
+
+    ```ini
+    palette = 0=#2e3440
+    palette = 1=#bf616a
+    palette = 2=#a3be8c
+    palette = 3=#ebcb8b
+    palette = 4=#88c0d0
+    palette = 5=#b48ead
+    palette = 6=#8fbcbb
+    palette = 7=#eceff4
+    palette = 8=#4c566a
+    palette = 9=#bf616a
+    palette = 10=#a3be8c
+    palette = 11=#ebcb8b
+    palette = 12=#88c0d0
+    palette = 13=#b48ead
+    palette = 14=#8fbcbb
+    palette = 15=#eceff4
+
+    background = #2e3440
+    foreground = #eceff4
+    cursor-color = #eceff4
+    selection-background = #434c5e
+    selection-foreground = #eceff4
+    ```
+
+    <Tip>
+    Ghostty uses a simple `key = value` format with `#` for hex colors.
+    </Tip>
+  </Step>
+
+  <Step title="Create Swaync notification colors">
+    Create `~/dotfiles/config/swaync/colors/custom/nord.css`:
+
+    ```css
+    /* Same CSS format as Waybar and Wofi */
+    @define-color bg0 #2E3440;
+    @define-color bg1 #3B4252;
+    @define-color bg2 #434C5E;
+    @define-color bg3 #4C566A;
+    @define-color bg4 #4C566A;
+
+    @define-color fg  #ECEFF4;
+
+    @define-color red    #BF616A;
+    @define-color orange #D08770;
+    @define-color yellow #EBCB8B;
+    @define-color green  #A3BE8C;
+    @define-color aqua   #8FBCBB;
+    @define-color blue   #88C0D0;
+    @define-color purple #B48EAD;
+    @define-color pink   #B48EAD;
+
+    @define-color grey0 #4C566A;
+    @define-color grey1 #4C566A;
+    @define-color grey2 #434C5E;
+    ```
+  </Step>
+
+  <Step title="Create Wlogout colors">
+    Create `~/dotfiles/config/wlogout/colors/custom/nord.css`:
+
+    ```css
+    /* Same CSS format as other components */
+    @define-color bg0 #2E3440;
+    @define-color bg1 #3B4252;
+    @define-color bg2 #434C5E;
+    @define-color bg3 #4C566A;
+    @define-color bg4 #4C566A;
+
+    @define-color fg  #ECEFF4;
+
+    @define-color red    #BF616A;
+    @define-color orange #D08770;
+    @define-color yellow #EBCB8B;
+    @define-color green  #A3BE8C;
+    @define-color aqua   #8FBCBB;
+    @define-color blue   #88C0D0;
+    @define-color purple #B48EAD;
+    @define-color pink   #B48EAD;
+
+    @define-color grey0 #4C566A;
+    @define-color grey1 #4C566A;
+    @define-color grey2 #434C5E;
+    ```
+  </Step>
+
+  <Step title="Create Btop theme">
+    Create `~/dotfiles/config/btop/themes/custom/nord.theme`:
+
+    ```ini
+    # Nord theme for btop
+
+    theme[main_bg]="#2e3440"
+    theme[main_fg]="#eceff4"
+    theme[title]="#eceff4"
+    theme[hi_fg]="#88c0d0"
+    theme[selected_bg]="#434c5e"
+    theme[selected_fg]="#88c0d0"
+    theme[inactive_fg]="#4c566a"
+    theme[proc_misc]="#ebcb8b"
+    theme[cpu_box]="#88c0d0"
+    theme[mem_box]="#a3be8c"
+    theme[net_box]="#b48ead"
+    theme[proc_box]="#bf616a"
+    theme[div_line]="#4c566a"
+    theme[temp_start]="#a3be8c"
+    theme[temp_mid]="#ebcb8b"
+    theme[temp_end]="#bf616a"
+    theme[cpu_start]="#a3be8c"
+    theme[cpu_mid]="#ebcb8b"
+    theme[cpu_end]="#bf616a"
+    theme[free_start]="#a3be8c"
+    theme[free_mid]="#ebcb8b"
+    theme[free_end]="#bf616a"
+    theme[cached_start]="#a3be8c"
+    theme[cached_mid]="#ebcb8b"
+    theme[cached_end]="#bf616a"
+    theme[available_start]="#a3be8c"
+    theme[available_mid]="#ebcb8b"
+    theme[available_end]="#bf616a"
+    theme[used_start]="#a3be8c"
+    theme[used_mid]="#ebcb8b"
+    theme[used_end]="#bf616a"
+    theme[download_start]="#a3be8c"
+    theme[download_mid]="#ebcb8b"
+    theme[download_end]="#bf616a"
+    theme[upload_start]="#a3be8c"
+    theme[upload_mid]="#ebcb8b"
+    theme[upload_end]="#bf616a"
+    ```
+  </Step>
+
+  <Step title="Create Cava visualizer theme">
+    Create `~/dotfiles/config/cava/themes/custom/nord`:
+
+    ```ini
+    [color]
+    gradient = 1
+    gradient_count = 6
+    gradient_color_1 = '#a3be8c'
+    gradient_color_2 = '#8fbcbb'
+    gradient_color_3 = '#88c0d0'
+    gradient_color_4 = '#88c0d0'
+    gradient_color_5 = '#b48ead'
+    gradient_color_6 = '#bf616a'
+    ```
+  </Step>
+
+  <Step title="Update theme-switcher script">
+    Edit `~/dotfiles/scripts/theme-switcher` to add your theme to the case statement:
+
+    ```bash
+    # Around line 30-56, add your theme:
+    case $THEME in
+    kanagawa)
+      VSCODIUM_THEME="Kanagawa Wave"
+      NVIM_THEME="kanagawa"
+      NOTIFY_ICON="🌊"
+      ;;
+    # ... other themes ...
+    nord)
+      VSCODIUM_THEME="Nord"
+      NVIM_THEME="nord"
+      NOTIFY_ICON="❄️"
+      ;;
+    *)
+      echo "❌ Error: Tema no reconocido."
+      exit 1
+      ;;
+    esac
+    ```
+
+    <Warning>
+    Make sure the `VSCODIUM_THEME` matches an installed VSCodium theme name exactly, and `NVIM_THEME` matches your Neovim theme.
+    </Warning>
+  </Step>
+
+  <Step title="Add matching wallpaper (optional)">
+    Add a wallpaper for your theme to `~/dotfiles/config/hypr/wallpapers/`:
+
+    ```bash
+    # Name it starting with your theme name
+    cp /path/to/your/wallpaper.png ~/dotfiles/config/hypr/wallpapers/nord-mountains.png
+    ```
+
+    The theme switcher will automatically find wallpapers that start with your theme name.
+  </Step>
+
+  <Step title="Restow and test">
+    ```bash
+    cd ~/dotfiles
+    stow -v -R -t ~/.config config
+    stow -v -R -t ~/.local/bin scripts
+
+    # Test your theme
+    theme-switcher nord
+    ```
+  </Step>
+</Steps>
+
+## Color Variable Naming Convention
+
+All theme files should use these standardized variable names:
+
+### Background Colors
+```plaintext
+bg0  - Darkest background (shadows, deep backgrounds)
+bg1  - Main background (primary background color)
+bg2  - Secondary background (hover states)
+bg3  - Tertiary background (active elements)
+bg4  - Lightest background (highlights)
+```
+
+### Foreground Colors
+```plaintext
+fg   - Primary text color
+```
+
+### Accent Colors
+```plaintext
+red     - Error states, danger actions
+orange  - Warnings, secondary highlights
+yellow  - Caution, information
+green   - Success, positive actions
+aqua    - Utility color
+blue    - Primary accent, links, focus
+purple  - Special elements
+pink    - Alternative accent
+```
+
+### Neutral Colors
+```plaintext
+grey0  - Primary grey (borders, dividers)
+grey1  - Secondary grey (inactive text)
+grey2  - Tertiary grey (subtle elements)
+```
+
+<Tip>
+Using consistent variable names allows the theme to work seamlessly across all components without editing CSS files.
+</Tip>
+
+## Testing Your Theme
+
+After creating your theme files:
+
+<Steps>
+  <Step title="Switch to the theme">
+    ```bash
+    theme-switcher nord
+    ```
+  </Step>
+
+  <Step title="Verify each component">
+    - **Hyprland**: Check window borders and backgrounds
+    - **Waybar**: Status bar should reflect new colors
+    - **Wofi**: Open launcher with `Super + Space`
+    - **Ghostty**: Open terminal with `Super + T`
+    - **Swaync**: Toggle notifications with `Super + N`
+    - **Btop**: Open with `btop` command
+    - **Cava**: Open with `cava` command
+  </Step>
+
+  <Step title="Check hot-reload">
+    Most components should update instantly. If not:
+    ```bash
+    # Reload Hyprland
+    hyprctl reload
+
+    # Restart Waybar
+    killall waybar && waybar &
+
+    # Reload Ghostty
+    killall -SIGUSR2 ghostty
+
+    # Reload Swaync
+    swaync-client -rs
+    ```
+  </Step>
+
+  <Step title="Fine-tune colors">
+    If colors don't look right, adjust your theme files and switch again:
+    ```bash
+    # Edit theme file
+    nvim ~/dotfiles/config/hypr/colors/custom/nord.conf
+
+    # Reapply theme
+    theme-switcher nord
+    ```
+  </Step>
+</Steps>
+
+## Editor Themes
+
+### Neovim
+
+For Neovim themes, install the colorscheme plugin and it will automatically be applied:
+
+```lua
+-- In ~/.config/nvim/lua/plugins/colorscheme.lua
+return {
+  {
+    "shaunsingh/nord.nvim",
+    lazy = false,
+    priority = 1000,
+  },
+}
+```
+
+The `theme_bridge.lua` file is automatically updated by the theme switcher.
+
+### VSCodium
+
+Install the matching theme extension from Open VSX:
+
+1. Open VSCodium
+2. Go to Extensions (`Ctrl+Shift+X`)
+3. Search for "Nord Theme"
+4. Install it
+5. The theme switcher will automatically select it
+
+## Committing Your Theme
+
+Once your theme is complete and tested:
+
+```bash
+cd ~/dotfiles
+git add -A
+git commit -m "Add Nord theme support"
+git push
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Customization" href="/guides/customization" icon="sliders">
+    Learn how to customize other aspects of your setup
+  </Card>
+  
+  <Card title="Troubleshooting" href="/guides/troubleshooting" icon="wrench">
+    Fix common theme and configuration issues
+  </Card>
+</CardGroup>

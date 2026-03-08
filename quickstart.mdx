@@ -1,80 +1,421 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Get up and running with Kanagawa dotfiles in 5 minutes
 ---
 
-## Get started in three steps
+# Quick Start Guide
 
-Get your documentation site running locally and make your first customization.
-
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+Get your Kanagawa dotfiles setup ready in just 5 minutes! This guide covers the essential steps to go from zero to a fully functional, beautiful desktop environment.
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  **Prerequisites:** Make sure you have Arch Linux installed and the required packages ready. See the [Installation Guide](/installation) for detailed requirements.
+</Note>
+
+## One-Command Setup
+
+If you already have all prerequisites installed, you can set up everything with these commands:
+
+```bash
+# Clone the repository
+git clone https://github.com/nixer112/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+
+# Run the installer
+chmod +x install.sh
+./install.sh
+
+# Make scripts executable
+chmod +x ~/.local/bin/*
+
+# Reload your shell
+exec zsh
+```
+
+That's it! You're now running Kanagawa dotfiles.
+
+## Step-by-Step Quick Setup
+
+<Steps>
+  <Step title="Clone & Install">
+    Get the dotfiles and deploy them:
+    
+    <CodeGroup>
+      ```bash Clone Repository
+      git clone https://github.com/nixer112/dotfiles.git ~/dotfiles
+      cd ~/dotfiles
+      ```
+
+      ```bash Run Installer
+      chmod +x install.sh
+      ./install.sh
+      ```
+
+      ```bash Enable Scripts
+      chmod +x ~/.local/bin/*
+      ```
+    </CodeGroup>
+    
+    <Tip>
+      The installer uses GNU Stow to create symlinks, so your original files in `~/dotfiles` remain the source of truth.
+    </Tip>
+  </Step>
+
+  <Step title="Start Hyprland">
+    Launch Hyprland to see your new environment:
+    
+    ```bash
+    Hyprland
+    ```
+    
+    Or reboot and select Hyprland from your display manager (GDM, SDDM, etc.).
+    
+    <Note>
+      On first launch, you may need to configure Powerlevel10k. Just follow the interactive wizard - it takes about 30 seconds.
+    </Note>
+  </Step>
+
+  <Step title="Choose Your Theme">
+    Open the theme selector with:
+    
+    ```bash
+    theme-selector
+    ```
+    
+    Or use the keyboard shortcut (check your Hyprland keybinds).
+    
+    Available themes:
+    - **Kanagawa** 🌊 - The default, inspired by The Great Wave
+    - **Gruvbox** 📦 - Warm, retro colors
+    - **Catppuccin** ☕ - Pastel perfection
+    - **Everforest** 🌲 - Comfortable green
+    
+    <img src="/screenshots/theme-selector.png" alt="Theme Selector" />
+  </Step>
+
+  <Step title="Explore Your New Setup">
+    Try these essential keybindings (default Hyprland config):
+    
+    | Action | Keybind |
+    | :--- | :--- |
+    | Open Terminal | `Super + Return` |
+    | Launch Applications | `Super + D` |
+    | Close Window | `Super + Q` |
+    | Toggle Floating | `Super + V` |
+    | Switch Workspaces | `Super + 1-9` |
+    | Move Window to Workspace | `Super + Shift + 1-9` |
+    | Screenshot | `Super + Shift + S` |
+    | Power Menu | `Super + Shift + E` |
+    
+    <Tip>
+      `Super` is usually the Windows key on most keyboards.
+    </Tip>
+  </Step>
+</Steps>
+
+## First Steps After Installation
+
+### 1. Configure Your Terminal
+
+Open Ghostty (press `Super + Return`) and you'll see the Kanagawa theme already applied. Test some modern CLI tools:
+
+<CodeGroup>
+  ```bash File Viewing with Bat
+  # Instead of cat, use bat for syntax highlighting
+  bat ~/.config/hypr/hyprland.conf
+  ```
+
+  ```bash Better ls with Eza
+  # Modern replacement for ls
+  eza -la --icons
+  eza --tree --level=2
+  ```
+
+  ```bash Smart Navigation with Zoxide
+  # Jump to directories you've visited
+  z dotfiles
+  z config
+  ```
+
+  ```bash Fuzzy Finding with Fzf
+  # Search files interactively
+  fzf
+  
+  # Search command history
+  Ctrl + R
+  ```
+</CodeGroup>
+
+### 2. Switch Themes
+
+The theme switcher updates everything instantly. Try it out:
+
+```bash
+# Use the interactive selector
+theme-selector
+
+# Or switch directly from terminal
+theme-switcher gruvbox
+theme-switcher catppuccin
+theme-switcher everforest
+theme-switcher kanagawa  # Back to default
+```
+
+**What gets updated:**
+- ✓ Hyprland window borders and decorations
+- ✓ Waybar status bar colors
+- ✓ Wofi launcher appearance
+- ✓ Ghostty terminal colors
+- ✓ Neovim color scheme
+- ✓ VSCodium theme (if installed)
+- ✓ SwayNC notification styling
+- ✓ Wlogout power menu
+- ✓ Btop system monitor
+- ✓ Cava audio visualizer
+- ✓ Desktop wallpaper
+
+<Note>
+  The theme switcher is defined in `~/.local/bin/theme-switcher`. Here's how it works:
+</Note>
+
+<Accordion title="How the Theme Switcher Works">
+  The `theme-switcher` script is a powerful tool that orchestrates theme changes across your entire system:
+
+  ```bash
+  # Basic usage
+  theme-switcher <theme-name>
+  
+  # Available themes
+  theme-switcher kanagawa    # 🌊 Default Kanagawa Wave
+  theme-switcher gruvbox     # 📦 Gruvbox Dark Hard
+  theme-switcher catppuccin  # ☕ Catppuccin Mocha
+  theme-switcher everforest  # 🌲 Everforest Night Hard
+  ```
+
+  **What it does:**
+  1. Updates CSS imports for Waybar, Wofi, SwayNC, and Wlogout
+  2. Updates Hyprland color configuration
+  3. Switches Ghostty color scheme
+  4. Changes VSCodium color theme (if installed)
+  5. Updates Neovim colorscheme via Lua bridge
+  6. Links Btop and Cava theme files
+  7. Prompts for wallpaper selection (if multiple available)
+  8. Reloads all affected applications
+  9. Sends a notification when complete
+
+  All theme files are stored in `custom/` subdirectories:
+  - `~/.config/hypr/colors/custom/`
+  - `~/.config/waybar/colors/custom/`
+  - `~/.config/wofi/colors/custom/`
+  - And so on...
+</Accordion>
+
+### 3. Customize Waybar
+
+Your status bar is powered by Waybar. It shows:
+- Active workspaces
+- Window title
+- System tray
+- Network status
+- Volume
+- CPU/Memory usage
+- Date and time
+
+Click different modules to interact with them (e.g., click volume to mute/unmute).
+
+### 4. Use the Application Launcher
+
+Press `Super + D` to open Wofi, the application launcher. Start typing to search for apps:
+
+```
+Super + D → type "brave" → Enter
+Super + D → type "code" → Enter  (for VSCodium)
+Super + D → type "theme" → Enter (for theme-selector)
+```
+
+### 5. Master Window Management
+
+Hyprland is a tiling window manager. Windows automatically tile:
+
+<Steps>
+  <Step title="Open Multiple Windows">
+    Press `Super + Return` multiple times to open several terminals.
+  </Step>
+  
+  <Step title="Navigate Between Windows">
+    Use `Super + Arrow Keys` or `Super + H/J/K/L` (Vim-style).
+  </Step>
+  
+  <Step title="Move Windows">
+    Hold `Super + Shift` and use arrow keys or H/J/K/L.
+  </Step>
+  
+  <Step title="Resize Windows">
+    Enter resize mode with `Super + R`, then use arrow keys.
+  </Step>
+  
+  <Step title="Toggle Floating">
+    Press `Super + V` to make a window float. Drag it with `Super + Left Click`.
+  </Step>
+</Steps>
+
+### 6. Check System Info
+
+View your beautiful system information:
+
+```bash
+fastfetch
+```
+
+This displays your system specs with the Kanagawa color scheme.
+
+### 7. Monitor System Resources
+
+Launch the themed system monitor:
+
+```bash
+btop
+```
+
+Press `Q` to quit.
+
+### 8. Visualize Audio
+
+Play some music and run:
+
+```bash
+cava
+```
+
+You'll see a beautiful audio visualizer in your terminal.
+
+## Essential Commands Cheat Sheet
+
+<CardGroup cols={2}>
+  <Card title="File Operations" icon="folder">
+    ```bash
+    bat file.txt       # View with syntax
+    eza -la            # List files
+    z directory        # Jump to dir
+    fzf                # Find files
+    ```
+  </Card>
+  
+  <Card title="Theme Management" icon="palette">
+    ```bash
+    theme-selector     # GUI selector
+    theme-switcher kanagawa
+    theme-switcher gruvbox
+    ```
+  </Card>
+  
+  <Card title="System Info" icon="microchip">
+    ```bash
+    fastfetch          # System info
+    btop               # Resource monitor
+    cava               # Audio visualizer
+    ```
+  </Card>
+  
+  <Card title="Notifications" icon="bell">
+    ```bash
+    notify-send "Title" "Message"
+    swaync-client -t   # Toggle center
+    swaync-client -d   # Dismiss all
+    ```
+  </Card>
+</CardGroup>
+
+## Default Hyprland Keybindings
+
+<Tabs>
+  <Tab title="Window Management">
+    | Action | Keybind |
+    | :--- | :--- |
+    | Close window | `Super + Q` |
+    | Toggle floating | `Super + V` |
+    | Toggle fullscreen | `Super + F` |
+    | Move focus | `Super + Arrow Keys` |
+    | Move window | `Super + Shift + Arrow Keys` |
+    | Resize mode | `Super + R` |
+    | Toggle split | `Super + J` |
+  </Tab>
+  
+  <Tab title="Applications">
+    | Action | Keybind |
+    | :--- | :--- |
+    | Terminal | `Super + Return` |
+    | App launcher | `Super + D` |
+    | Browser | `Super + B` |
+    | File manager | `Super + E` |
+    | Editor | `Super + C` |
+  </Tab>
+  
+  <Tab title="Workspaces">
+    | Action | Keybind |
+    | :--- | :--- |
+    | Switch to workspace 1-9 | `Super + 1-9` |
+    | Move to workspace 1-9 | `Super + Shift + 1-9` |
+    | Next workspace | `Super + Mouse wheel` |
+    | Move to special workspace | `Super + S` |
+  </Tab>
+  
+  <Tab title="System">
+    | Action | Keybind |
+    | :--- | :--- |
+    | Power menu | `Super + Shift + E` |
+    | Screenshot (area) | `Super + Shift + S` |
+    | Screenshot (full) | `Print` |
+    | Lock screen | `Super + L` |
+    | Reload Hyprland | `Super + Shift + R` |
+  </Tab>
+</Tabs>
+
+<Tip>
+  Check `~/.config/hypr/hyprland.conf` for the complete list of keybindings and customize them to your preference.
+</Tip>
+
+## What's Next?
+
+Now that you're up and running, explore these guides:
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/config/hyprland">
+    Learn how to customize every aspect of your setup
+  </Card>
+  
+  <Card title="Themes Deep Dive" icon="palette" href="/themes/overview">
+    Create your own themes and customize colors
+  </Card>
+  
+  <Card title="Hyprland Config" icon="window-maximize" href="/config/hyprland">
+    Master Hyprland configuration and animations
+  </Card>
+  
+  <Card title="Shell & CLI Tools" icon="terminal" href="/config/shell">
+    Get the most out of Zsh and modern CLI utilities
+  </Card>
+</CardGroup>
+
+## Need Help?
+
+<AccordionGroup>
+  <Accordion title="Something not working?">
+    Check the [Installation Guide](/guides/troubleshooting) troubleshooting section for common issues.
+  </Accordion>
+  
+  <Accordion title="Want to customize keybindings?">
+    Edit `~/.config/hypr/hyprland.conf` and look for the `bind=` lines. Changes take effect immediately with `Super + Shift + R`.
+  </Accordion>
+  
+  <Accordion title="How do I add more themes?">
+    Create new CSS/config files in the `custom/` directories for each component. See the [Themes Guide](/themes/customization) for details.
+  </Accordion>
+  
+  <Accordion title="Where are the wallpapers?">
+    Wallpapers are stored in `~/.config/hypr/wallpapers/`. Name them with the theme prefix (e.g., `kanagawa-wave.png`) for automatic selection.
+  </Accordion>
+</AccordionGroup>
+
+<Note>
+  **Enjoy your new setup!** The Kanagawa dotfiles are designed to be both beautiful and productive. Take your time to explore and make it your own.
 </Note>

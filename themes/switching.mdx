@@ -1,0 +1,372 @@
+---
+title: Switching Themes
+description: Change your desktop theme instantly with interactive or command-line tools
+icon: arrows-rotate
+---
+
+The Kanagawa dotfiles provide two scripts for switching themes: `theme-selector` for interactive selection and `theme-switcher` for the actual theme application.
+
+## Quick Start
+
+Switch themes interactively:
+
+```bash
+theme-selector
+```
+
+Or switch directly from the command line:
+
+```bash
+theme-switcher kanagawa
+theme-switcher gruvbox
+theme-switcher catppuccin
+theme-switcher everforest
+```
+
+<Note>
+Both scripts are installed to `~/.local/bin/` and should be in your PATH by default.
+</Note>
+
+## Interactive Theme Selection
+
+The `theme-selector` script provides a graphical menu using Wofi (dmenu for Wayland):
+
+```bash
+#!/bin/bash
+
+# Definimos la lista de temas disponibles
+TEMAS="kanagawa\ngruvbox\ncatppuccin\neverforest"
+
+# Lanzamos Wofi y guardamos la elección del usuario en una variable
+ELECCION=$(echo -e "$TEMAS" | wofi --dmenu --prompt "🎨 Elige un tema:" --width 250 --height 350)
+
+# Si el usuario eligió algo (es decir, no pulsó Escape), ejecutamos set-theme
+if [ -n "$ELECCION" ]; then
+  ~/.local/bin/theme-switcher "$ELECCION"
+fi
+```
+
+**What it does:**
+1. Defines available themes
+2. Launches Wofi with a menu prompt
+3. Passes the selected theme to `theme-switcher`
+4. Does nothing if ESC is pressed
+
+<Tip>
+Bind this script to a keyboard shortcut in your Hyprland config for quick theme switching!
+
+```conf
+bind = $mainMod SHIFT, T, exec, theme-selector
+```
+</Tip>
+
+## Theme Switcher Internal Process
+
+The `theme-switcher` script is the workhorse that actually applies themes across all applications. Here's how it works:
+
+<Steps>
+  <Step title="Validate theme input">
+    Checks if a theme name was provided and validates it against known themes.
+    
+    ```bash
+    if [ -z "$THEME" ]; then
+      echo "❌ Error: No has especificado ningún tema."
+      echo "💡 Uso: set-theme <kanagawa|gruvbox|catppuccin>"
+      exit 1
+    fi
+    ```
+  </Step>
+  
+  <Step title="Update CSS-based applications">
+    Updates Waybar and Wofi by writing import statements with absolute paths.
+    
+    ```bash
+    # Usamos rutas absolutas para que GTK3 no se pierda nunca
+    echo "@import url(\"$HOME/.config/wofi/colors/custom/$THEME.css\");" >"$HOME/.config/wofi/colors/colors.css"
+    echo "@import url(\"$HOME/.config/waybar/colors/custom/$THEME.css\");" >"$HOME/.config/waybar/colors/colors.css"
+    ```
+  </Step>
+  
+  <Step title="Update Hyprland colors">
+    Creates a source directive pointing to the theme file.
+    
+    ```bash
+    echo "source = ~/.config/hypr/colors/custom/$THEME.conf" >"$HOME/.config/hypr/colors/colors.conf"
+    ```
+  </Step>
+  
+  <Step title="Update Ghostty terminal">
+    Sets the config-file directive for terminal colors.
+    
+    ```bash
+    echo "config-file = custom/$THEME" >"$HOME/.config/ghostty/colors/colors"
+    ```
+  </Step>
+  
+  <Step title="Map theme names">
+    Translates short theme names to full application-specific theme names.
+    
+    ```bash
+    case $THEME in
+    kanagawa)
+      VSCODIUM_THEME="Kanagawa Wave"
+      NVIM_THEME="kanagawa"
+      NOTIFY_ICON="🌊"
+      ;;
+    gruvbox)
+      VSCODIUM_THEME="Gruvbox Dark Hard"
+      NVIM_THEME="gruvbox"
+      NOTIFY_ICON="📦"
+      ;;
+    catppuccin)
+      VSCODIUM_THEME="Catppuccin Mocha"
+      NVIM_THEME="catppuccin"
+      NOTIFY_ICON="☕"
+      ;;
+    everforest)
+      VSCODIUM_THEME="Everforest Night Hard"
+      NVIM_THEME="everforest"
+      NOTIFY_ICON="🌲"
+      ;;
+    esac
+    ```
+  </Step>
+  
+  <Step title="Update VSCodium">
+    Uses sed to replace the workbench.colorTheme in settings.json.
+    
+    ```bash
+    VSCODIUM_SETTINGS="$HOME/.config/VSCodium/User/settings.json"
+    if [ -f "$VSCODIUM_SETTINGS" ]; then
+      sed -i -E "s/\"workbench.colorTheme\": \".*\"/\"workbench.colorTheme\": \"$VSCODIUM_THEME\"/g" "$VSCODIUM_SETTINGS"
+      echo "⚙️  Tema de VSCodium actualizado a $VSCODIUM_THEME"
+    fi
+    ```
+  </Step>
+  
+  <Step title="Update Neovim">
+    Creates a Lua bridge file that returns the theme name.
+    
+    ```bash
+    mkdir -p "$HOME/.config/nvim/lua"
+    echo "return '$NVIM_THEME'" >"$HOME/.config/nvim/lua/theme_bridge.lua"
+    ```
+  </Step>
+  
+  <Step title="Update SwayNC and Wlogout">
+    Creates import statements for notification and logout styling.
+    
+    ```bash
+    echo "@import \"custom/$THEME.css\";" >"$HOME/.config/swaync/colors/colors.css"
+    echo "@import \"custom/$THEME.css\";" >"$HOME/.config/wlogout/colors/colors.css"
+    ```
+  </Step>
+  
+  <Step title="Update Btop and Cava">
+    Creates symbolic links to the selected theme files.
+    
+    ```bash
+    ln -sf "$HOME/.config/btop/themes/custom/$THEME.theme" "$HOME/.config/btop/themes/colors.theme"
+    ln -sf "$HOME/.config/cava/themes/custom/$THEME" "$HOME/.config/cava/themes/colors"
+    ```
+  </Step>
+  
+  <Step title="Reload running applications">
+    Triggers live reloads without requiring logout/restart.
+    
+    ```bash
+    # Reload SwayNC CSS
+    swaync-client -rs
+    
+    # Reload Hyprland configuration
+    hyprctl reload &>/dev/null
+    
+    # Restart Waybar
+    killall waybar &>/dev/null
+    waybar &>/dev/null &
+    disown
+    
+    # Hot-reload Ghostty
+    killall -SIGUSR2 ghostty
+    ```
+  </Step>
+  
+  <Step title="Select wallpaper (optional)">
+    Finds wallpapers matching the theme name and prompts selection if multiple are found.
+    
+    ```bash
+    WALLPAPER_DIR="$HOME/.config/hypr/wallpapers"
+    AVAILABLE_WALLPAPERS=$(find "$WALLPAPER_DIR" -maxdepth 1 -type f -iname "${THEME}*" | sort)
+    
+    if [ -n "$AVAILABLE_WALLPAPERS" ]; then
+      COUNT=$(echo "$AVAILABLE_WALLPAPERS" | wc -l)
+      
+      if [ "$COUNT" -eq 1 ]; then
+        SELECTED_WALLPAPER="$AVAILABLE_WALLPAPERS"
+      else
+        BASENAMES=$(echo "$AVAILABLE_WALLPAPERS" | xargs -n 1 basename)
+        CHOICE=$(echo "$BASENAMES" | wofi --dmenu --prompt "🖼️ Elige fondo para $THEME:")
+        
+        if [ -n "$CHOICE" ]; then
+          SELECTED_WALLPAPER="$WALLPAPER_DIR/$CHOICE"
+        else
+          SELECTED_WALLPAPER=$(echo "$AVAILABLE_WALLPAPERS" | head -n 1)
+        fi
+      fi
+      
+      hyprctl hyprpaper preload "$SELECTED_WALLPAPER" >/dev/null
+      hyprctl hyprpaper wallpaper ",\$SELECTED_WALLPAPER" >/dev/null
+      hyprctl hyprpaper unload all >/dev/null
+    fi
+    ```
+  </Step>
+  
+  <Step title="Show notification">
+    Displays a notification confirming the theme change.
+    
+    ```bash
+    notify-send "$NOTIFY_ICON Tema aplicado" "El entorno ahora usa $THEME" -t 2000 -a "Theme Switcher"
+    ```
+  </Step>
+</Steps>
+
+## What Happens During a Theme Switch
+
+<Tabs>
+  <Tab title="Configuration Files">
+    **Modified files:**
+    - `~/.config/hypr/colors/colors.conf`
+    - `~/.config/waybar/colors/colors.css`
+    - `~/.config/wofi/colors/colors.css`
+    - `~/.config/ghostty/colors/colors`
+    - `~/.config/swaync/colors/colors.css`
+    - `~/.config/wlogout/colors/colors.css`
+    - `~/.config/nvim/lua/theme_bridge.lua`
+    - `~/.config/VSCodium/User/settings.json`
+    
+    **Symlinks updated:**
+    - `~/.config/btop/themes/colors.theme`
+    - `~/.config/cava/themes/colors`
+  </Tab>
+  
+  <Tab title="Running Processes">
+    **Applications reloaded:**
+    - **Hyprland**: Config reloaded with `hyprctl reload`
+    - **Waybar**: Process killed and restarted
+    - **Ghostty**: Sent SIGUSR2 signal for hot-reload
+    - **SwayNC**: Style reloaded with `swaync-client -rs`
+    
+    **No reload needed:**
+    - **Neovim**: Theme applied on next launch (or manually with `:source`)
+    - **VSCodium**: Theme applied on next launch
+    - **Btop/Cava**: Theme applied on next launch
+  </Tab>
+  
+  <Tab title="Wallpaper">
+    The script automatically searches for wallpapers matching the theme name:
+    
+    ```plaintext
+    ~/.config/hypr/wallpapers/
+    ├── kanagawa-1.png
+    ├── kanagawa-2.jpg
+    ├── gruvbox-dark.png
+    ├── catppuccin-mocha.jpg
+    └── everforest.png
+    ```
+    
+    - If **one** wallpaper matches: automatically applied
+    - If **multiple** wallpapers match: Wofi menu for selection
+    - If **no** wallpapers match: current wallpaper unchanged
+  </Tab>
+</Tabs>
+
+## Command Line Examples
+
+```bash
+# Switch to Kanagawa theme
+theme-switcher kanagawa
+
+# Switch to Gruvbox theme
+theme-switcher gruvbox
+
+# Switch to Catppuccin theme
+theme-switcher catppuccin
+
+# Switch to Everforest theme
+theme-switcher everforest
+```
+
+<Warning>
+If you specify an invalid theme name, the script will exit with an error:
+
+```plaintext
+❌ Error: Tema no reconocido.
+```
+</Warning>
+
+## Keyboard Shortcuts
+
+Add this to your Hyprland config (`~/.config/hypr/hyprland.conf`):
+
+```conf
+# Theme selector
+bind = $mainMod SHIFT, T, exec, theme-selector
+
+# Quick theme switches
+bind = $mainMod ALT, 1, exec, theme-switcher kanagawa
+bind = $mainMod ALT, 2, exec, theme-switcher gruvbox
+bind = $mainMod ALT, 3, exec, theme-switcher catppuccin
+bind = $mainMod ALT, 4, exec, theme-switcher everforest
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Theme doesn't apply to all applications">
+    Some applications require a restart to load the new theme:
+    
+    ```bash
+    # Restart Neovim sessions
+    # Restart VSCodium
+    # Restart Btop if currently running
+    ```
+  </Accordion>
+  
+  <Accordion title="Waybar doesn't update">
+    If Waybar doesn't restart automatically:
+    
+    ```bash
+    killall waybar && waybar &
+    ```
+  </Accordion>
+  
+  <Accordion title="Colors look wrong">
+    Ensure all theme files exist:
+    
+    ```bash
+    ls ~/.config/*/colors/custom/
+    ```
+    
+    All directories should contain matching theme files.
+  </Accordion>
+  
+  <Accordion title="Wallpaper doesn't change">
+    Make sure wallpaper files are named with the theme prefix:
+    
+    ```bash
+    # Good:
+    kanagawa-mountains.png
+    gruvbox-sunset.jpg
+    
+    # Bad:
+    mountains.png
+    sunset.jpg
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<Card title="Create Custom Themes" icon="paintbrush" href="/themes/customization">
+  Learn how to create your own custom themes with personalized colors
+</Card>
