@@ -1,0 +1,92 @@
+{
+  "projectType": "general",
+  "projectName": "Kanagawa Dotfiles",
+  "projectDescription": "A minimalist, productivity-focused Arch Linux + Hyprland dotfiles collection with dynamic theme switching and modular configuration.",
+  "theme": "aspen",
+  "primaryColor": "#94cb04",
+  "lightColor": "#545454",
+  "darkColor": null,
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Configuration",
+        "pages": [
+          "config/hyprland",
+          "config/waybar",
+          "config/neovim",
+          "config/ghostty",
+          "config/shell"
+        ]
+      },
+      {
+        "group": "Themes",
+        "pages": [
+          "themes/overview",
+          "themes/switching",
+          "themes/customization"
+        ]
+      },
+      {
+        "group": "Components",
+        "pages": [
+          "components/window-manager",
+          "components/terminal",
+          "components/editor",
+          "components/launcher",
+          "components/notifications"
+        ]
+      },
+      {
+        "group": "Scripts",
+        "pages": [
+          "scripts/theme-selector",
+          "scripts/theme-switcher",
+          "scripts/custom"
+        ]
+      },
+      {
+        "group": "Guides",
+        "pages": [
+          "guides/stow-management",
+          "guides/adding-themes",
+          "guides/customization",
+          "guides/troubleshooting"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Dynamic theme switching (Kanagawa, Gruvbox, Catppuccin, Everforest)",
+    "Hyprland Wayland compositor with custom animations and keybindings",
+    "LazyVim Neovim configuration with Lua plugins",
+    "Ghostty terminal with theme integration",
+    "Waybar status bar with modular configuration",
+    "Wofi application launcher",
+    "GNU Stow-based dotfile management",
+    "Zsh shell with Oh My Zsh and Powerlevel10k",
+    "Unified color scheme across all applications",
+    "Automated installation scripts"
+  ],
+  "publicApiSurface": [
+    "install.sh - Main installation script",
+    "theme-selector - Interactive theme picker using Wofi",
+    "theme-switcher - Theme application script",
+    "weather - Weather information script",
+    "config/hypr/hyprland.conf - Main Hyprland configuration",
+    "config/waybar/config - Waybar configuration",
+    "config/nvim/init.lua - Neovim entry point",
+    "config/ghostty/config - Ghostty terminal configuration",
+    "shell/.zshrc - Zsh configuration",
+    "config/hypr/keybindings.conf - Keyboard shortcuts",
+    "config/hypr/animations.conf - Animation settings",
+    "config/hypr/colors/custom/*.conf - Theme color definitions"
+  ]
+}
